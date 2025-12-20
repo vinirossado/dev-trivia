@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Trivia System – ER Diagram</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        primaryColor: '#2d3748',
+        primaryTextColor: '#e2e8f0',
+        primaryBorderColor: '#4a5568',
+        lineColor: '#718096',
+        secondaryColor: '#1a202c',
+        tertiaryColor: '#2d3748',
+        background: '#1a202c',
+        mainBkg: '#2d3748',
+        secondBkg: '#1a202c',
+        textColor: '#e2e8f0',
+        fontSize: '14px'
+      }
+    });
+  </script>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html">📊 Table View</a>
+  <a href="diagram.html" class="active">🔀 ER Diagram</a>
+</nav>
+
+<h1>🎯 Dev Trivia System – Entity Relationship Diagram</h1>
+
+<div class="mermaid-container">
+  <pre class="mermaid">
+erDiagram
+
+    Users {
+        uuid Id PK
+        varchar Username
+        varchar Email
+        text PasswordHash
+        boolean EmailVerified
+        timestamp CreatedAt
+    }
+
+    AuthSessions {
+        uuid Id PK
+        uuid UserId FK
+        text RefreshTokenHash
+        timestamp ExpiresAt
+        timestamp RevokedAt
+    }
+
+    UserRoles {
+        uuid UserId PK
+        varchar Role
+    }
+
+    PlayerStats {
+        uuid UserId PK
+        int TotalMatches
+        int TotalCorrect
+        int EloRating
+    }
+
+    QuestionExposure {
+        uuid UserId PK
+        uuid QuestionId PK
+        timestamp LastSeenAt
+        int TimesShown
+    }
+
+    Categories {
+        uuid Id PK
+        nvarchar Name
+        nvarchar Description
+    }
+
+    Questions {
+        uuid Id PK
+        nvarchar Title
+        nvarchar Description
+        nvarchar Difficulty
+        uuid CategoryId FK
+    }
+
+    AnswerOptions {
+        uuid Id PK
+        uuid QuestionId FK
+        nvarchar Text
+        boolean IsCorrect
+    }
+
+    Matches {
+        uuid Id PK
+        datetime StartedAt
+        datetime EndedAt
+        nvarchar Status
+        uuid SelectedCategoryId FK
+    }
+
+    PlayerAnswers {
+        uuid Id PK
+        uuid MatchId FK
+        uuid UserId FK
+        uuid QuestionId FK
+        uuid AnswerOptionId FK
+        boolean IsCorrect
+        datetime AnsweredAt
+    }
+
+    Users ||--o{ AuthSessions : has
+    Users ||--o{ UserRoles : has
+    Users ||--|| PlayerStats : has
+    Users ||--o{ QuestionExposure : tracks
+    Questions ||--o{ QuestionExposure : exposed_to
+    Categories ||--o{ Questions : categorizes
+    Questions ||--o{ AnswerOptions : has
+    Matches ||--o{ PlayerAnswers : contains
+    Users ||--o{ PlayerAnswers : answers
+    Questions ||--o{ PlayerAnswers : evaluated_in
+    AnswerOptions ||--o{ PlayerAnswers : selected_in
+    Categories ||--o{ Matches : selected_for
+  </pre>
+</div>
+
+<div class="relationship">
+  🔗 Key Relationships:
+  <strong>Users → AuthSessions, UserRoles, PlayerStats</strong> (User authentication and statistics)<br/>
+  <strong>Users ↔ QuestionExposure</strong> (Tracks which questions users have seen)<br/>
+  <strong>Categories → Questions → AnswerOptions</strong> (Questions are categorized and have answer options)<br/>
+  <strong>Matches → PlayerAnswers</strong> (Matches contain player answers)<br/>
+  <strong>PlayerAnswers</strong> connects Users, Matches, Questions, and AnswerOptions
+</div>
+
+</body>
+</html>

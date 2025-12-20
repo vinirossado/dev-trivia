@@ -4,8 +4,15 @@
   <meta charset="UTF-8" />
   <title>Trivia System – Data Model</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="mermaid-init.js"></script>
 </head>
 <body>
+
+<nav class="nav">
+  <a href="index.html" class="active">📊 Table View</a>
+  <a href="diagram.html">🔀 ER Diagram</a>
+</nav>
 
 <h1>🎯 Dev Trivia System</h1>
 
@@ -263,6 +270,262 @@
   <strong>Categories (1) → (N) Questions → (N) AnswerOptions</strong><br/>
   <strong>Matches (1) → (N) PlayerAnswers</strong><br/>
   A player answers multiple questions per match.
+</div>
+
+<div class="documentation">
+  <h2>📚 Table Documentation</h2>
+  
+  <div class="doc-grid">
+    
+    <!-- User Management Section -->
+    <div class="doc-category">
+      <div class="category-header user-header">
+        <span class="category-icon">👤</span>
+        <h3>User Management</h3>
+      </div>
+      
+      <div class="doc-card">
+        <div class="card-title">
+          <span class="emoji">👤</span>
+          <strong>Users</strong>
+        </div>
+        <p class="card-description">Central table storing user account information.</p>
+        <div class="field-list">
+          <div class="field-item">
+            <code>Username</code>
+            <span>Unique identifier for user login</span>
+          </div>
+          <div class="field-item">
+            <code>Email</code>
+            <span>User's email for authentication</span>
+          </div>
+          <div class="field-item">
+            <code>PasswordHash</code>
+            <span>Encrypted password for security</span>
+          </div>
+          <div class="field-item">
+            <code>EmailVerified</code>
+            <span>Email confirmation status</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="card-title">
+          <span class="emoji">🔐</span>
+          <strong>AuthSessions</strong>
+        </div>
+        <p class="card-description">Manages authentication sessions and refresh tokens.</p>
+        <div class="field-list">
+          <div class="field-item">
+            <code>RefreshTokenHash</code>
+            <span>Hashed token for session renewal</span>
+          </div>
+          <div class="field-item">
+            <code>ExpiresAt</code>
+            <span>Session expiration timestamp</span>
+          </div>
+          <div class="field-item">
+            <code>RevokedAt</code>
+            <span>Session invalidation timestamp</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="card-title">
+          <span class="emoji">🎭</span>
+          <strong>UserRoles</strong>
+        </div>
+        <p class="card-description">Defines user permissions and access levels.</p>
+        <div class="field-list">
+          <div class="field-item">
+            <code>Role</code>
+            <span>Permission level (admin, player, moderator)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="card-title">
+          <span class="emoji">📊</span>
+          <strong>PlayerStats</strong>
+        </div>
+        <p class="card-description">Tracks player performance metrics and skill rating.</p>
+        <div class="field-list">
+          <div class="field-item">
+            <code>TotalMatches</code>
+            <span>Total number of games played</span>
+          </div>
+          <div class="field-item">
+            <code>TotalCorrect</code>
+            <span>Cumulative correct answers</span>
+          </div>
+          <div class="field-item">
+            <code>EloRating</code>
+            <span>Skill-based ranking score</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="card-title">
+          <span class="emoji">👁️</span>
+          <strong>QuestionExposure</strong>
+        </div>
+        <p class="card-description">Prevents question repetition by tracking views.</p>
+        <div class="field-list">
+          <div class="field-item">
+            <code>LastSeenAt</code>
+            <span>Most recent encounter timestamp</span>
+          </div>
+          <div class="field-item">
+            <code>TimesShown</code>
+            <span>Question appearance counter</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Question Bank Section -->
+    <div class="doc-category">
+      <div class="category-header question-header">
+        <span class="category-icon">❓</span>
+        <h3>Question Bank</h3>
+      </div>
+      
+      <div class="doc-card">
+        <div class="card-title">
+          <span class="emoji">🗂️</span>
+          <strong>Categories</strong>
+        </div>
+        <p class="card-description">Organizes questions into thematic groups.</p>
+        <div class="field-list">
+          <div class="field-item">
+            <code>Name</code>
+            <span>Category display name</span>
+          </div>
+          <div class="field-item">
+            <code>Description</code>
+            <span>Detailed category scope explanation</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="card-title">
+          <span class="emoji">❓</span>
+          <strong>Questions</strong>
+        </div>
+        <p class="card-description">Core trivia content with problem statements.</p>
+        <div class="field-list">
+          <div class="field-item">
+            <code>Title</code>
+            <span>Brief question summary</span>
+          </div>
+          <div class="field-item">
+            <code>Description</code>
+            <span>Full question text with context</span>
+          </div>
+          <div class="field-item">
+            <code>Difficulty</code>
+            <span>Challenge level (Easy, Medium, Hard)</span>
+          </div>
+          <div class="field-item">
+            <code>CategoryId</code>
+            <span>Links question to its category</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="card-title">
+          <span class="emoji">📝</span>
+          <strong>AnswerOptions</strong>
+        </div>
+        <p class="card-description">Multiple choice answers for each question.</p>
+        <div class="field-list">
+          <div class="field-item">
+            <code>Text</code>
+            <span>Answer choice content</span>
+          </div>
+          <div class="field-item">
+            <code>IsCorrect</code>
+            <span>Marks the correct answer</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Sessions Section -->
+    <div class="doc-category">
+      <div class="category-header game-header">
+        <span class="category-icon">🎮</span>
+        <h3>Game Sessions</h3>
+      </div>
+      
+      <div class="doc-card">
+        <div class="card-title">
+          <span class="emoji">🎮</span>
+          <strong>Matches</strong>
+        </div>
+        <p class="card-description">Represents individual game sessions with metadata.</p>
+        <div class="field-list">
+          <div class="field-item">
+            <code>StartedAt</code>
+            <span>Game initiation timestamp</span>
+          </div>
+          <div class="field-item">
+            <code>EndedAt</code>
+            <span>Game completion timestamp</span>
+          </div>
+          <div class="field-item">
+            <code>Status</code>
+            <span>Current state (in_progress, completed)</span>
+          </div>
+          <div class="field-item">
+            <code>SelectedCategoryId</code>
+            <span>Category chosen for this match</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="card-title">
+          <span class="emoji">✅</span>
+          <strong>PlayerAnswers</strong>
+        </div>
+        <p class="card-description">Records every answer for scoring and analytics.</p>
+        <div class="field-list">
+          <div class="field-item">
+            <code>MatchId</code>
+            <span>Links answer to game session</span>
+          </div>
+          <div class="field-item">
+            <code>UserId</code>
+            <span>Identifies who submitted the answer</span>
+          </div>
+          <div class="field-item">
+            <code>QuestionId</code>
+            <span>References the question being answered</span>
+          </div>
+          <div class="field-item">
+            <code>AnswerOptionId</code>
+            <span>Selected answer choice</span>
+          </div>
+          <div class="field-item">
+            <code>IsCorrect</code>
+            <span>Cached correctness for quick scoring</span>
+          </div>
+          <div class="field-item">
+            <code>AnsweredAt</code>
+            <span>Response time tracking timestamp</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 </body>
