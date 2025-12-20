@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Trivia System – Data Model</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<h1>🎯 Dev Trivia System</h1>
+
+<div class="diagram">
+
+  <!-- USER -->
+  <div class="table">
+    <div class="table-title">👤 Users</div>
+    <div class="row">
+      <span>Id</span>
+      <span class="type">UUID</span>
+      <span class="badge pk">PK</span>
+    </div>
+    <div class="row">
+      <span>Username</span>
+      <span class="type">VARCHAR(50)</span>
+    </div>
+    <div class="row">
+      <span>Email</span>
+      <span class="type">VARCHAR(255)</span>
+    </div>
+    <div class="row">
+      <span>PasswordHash</span>
+      <span class="type">TEXT</span>
+    </div>
+    <div class="row">
+      <span>EmailVerified</span>
+      <span class="type">BOOLEAN</span>
+    </div>
+    <div class="row">
+      <span>CreatedAt</span>
+      <span class="type">TIMESTAMP</span>
+    </div>
+  </div>
+
+  <div class="table">
+    <div class="table-title">🔐 AuthSessions</div>
+    <div class="row">
+      <span>Id</span>
+      <span class="type">UUID</span>
+      <span class="badge pk">PK</span>
+    </div>
+    <div class="row">
+      <span>UserId</span>
+      <span class="type">UUID</span>
+      <span class="badge fk">FK</span>
+    </div>
+    <div class="row">
+      <span>RefreshTokenHash</span>
+      <span class="type">TEXT</span>
+    </div>
+    <div class="row">
+      <span>ExpiresAt</span>
+      <span class="type">TIMESTAMP</span>
+    </div>
+    <div class="row">
+      <span>RevokedAt</span>
+      <span class="type">TIMESTAMP</span>
+    </div>
+  </div>
+
+  <div class="table">
+    <div class="table-title">🎭 UserRoles</div>
+    <div class="row">
+      <span>UserId</span>
+      <span class="type">UUID</span>
+      <span class="badge pk">PK</span>
+    </div>
+    <div class="row">
+      <span>Role</span>
+      <span class="type">VARCHAR(30)</span>
+    </div>
+  </div>
+
+  <div class="table">
+    <div class="table-title">📊 PlayerStats</div>
+    <div class="row">
+      <span>UserId</span>
+      <span class="type">UUID</span>
+      <span class="badge pk">PK</span>
+    </div>
+    <div class="row">
+      <span>TotalMatches</span>
+      <span class="type">INT</span>
+    </div>
+    <div class="row">
+      <span>TotalCorrect</span>
+      <span class="type">INT</span>
+    </div>
+    <div class="row">
+      <span>EloRating</span>
+      <span class="type">INT</span>
+    </div>
+  </div>
+
+  <div class="table">
+    <div class="table-title">👁️ QuestionExposure</div>
+    <div class="row">
+      <span>UserId</span>
+      <span class="type">UUID</span>
+      <span class="badge pk">PK</span>
+    </div>
+    <div class="row">
+      <span>QuestionId</span>
+      <span class="type">UUID</span>
+      <span class="badge pk">PK</span>
+    </div>
+    <div class="row">
+      <span>LastSeenAt</span>
+      <span class="type">TIMESTAMP</span>
+    </div>
+    <div class="row">
+      <span>TimesShown</span>
+      <span class="type">INT</span>
+    </div>
+  </div>
+
+  <!-- CATEGORY -->
+  <div class="table">
+    <div class="table-title">🗂️ Categories</div>
+    <div class="row">
+      <span>Id</span>
+      <span class="type">UUID</span>
+      <span class="badge pk">PK</span>
+    </div>
+    <div class="row">
+      <span>Name</span>
+      <span class="type">NVARCHAR(100)</span>
+    </div>
+    <div class="row">
+      <span>Description</span>
+      <span class="type">NVARCHAR(MAX)</span>
+    </div>
+  </div>
+
+  <!-- QUESTION -->
+  <div class="table">
+    <div class="table-title">❓ Questions</div>
+    <div class="row">
+      <span>Id</span>
+      <span class="type">UUID</span>
+      <span class="badge pk">PK</span>
+    </div>
+    <div class="row">
+      <span>Title</span>
+      <span class="type">NVARCHAR(255)</span>
+    </div>
+    <div class="row">
+      <span>Description</span>
+      <span class="type">NVARCHAR(MAX)</span>
+    </div>
+    <div class="row">
+      <span>Difficulty</span>
+      <span class="type">NVARCHAR(20)</span>
+    </div>
+    <div class="row">
+      <span>CategoryId</span>
+      <span class="type">UUID</span>
+      <span class="badge fk">FK</span>
+    </div>
+  </div>
+
+  <!-- ANSWER OPTION -->
+  <div class="table">
+    <div class="table-title">📝 AnswerOptions</div>
+    <div class="row">
+      <span>Id</span>
+      <span class="type">UUID</span>
+      <span class="badge pk">PK</span>
+    </div>
+    <div class="row">
+      <span>QuestionId</span>
+      <span class="type">UUID</span>
+      <span class="badge fk">FK</span>
+    </div>
+    <div class="row">
+      <span>Text</span>
+      <span class="type">NVARCHAR(255)</span>
+    </div>
+    <div class="row">
+      <span>IsCorrect</span>
+      <span class="type">BOOLEAN</span>
+    </div>
+  </div>
+
+  <!-- MATCH -->
+  <div class="table">
+    <div class="table-title">🎮 Matches</div>
+    <div class="row">
+      <span>Id</span>
+      <span class="type">UUID</span>
+      <span class="badge pk">PK</span>
+    </div>
+    <div class="row">
+      <span>StartedAt</span>
+      <span class="type">DATETIME</span>
+    </div>
+    <div class="row">
+      <span>EndedAt</span>
+      <span class="type">DATETIME</span>
+    </div>
+    <div class="row">
+      <span>Status</span>
+      <span class="type">NVARCHAR(20)</span>
+    </div>
+    <div class="row">
+      <span>SelectedCategoryId</span>
+      <span class="type">UUID</span>
+      <span class="badge fk">FK</span>
+    </div>
+  </div>
+
+  <!-- PLAYER ANSWER -->
+  <div class="table">
+    <div class="table-title">✅ PlayerAnswers</div>
+    <div class="row">
+      <span>Id</span>
+      <span class="type">UUID</span>
+      <span class="badge pk">PK</span>
+    </div>
+    <div class="row">
+      <span>MatchId</span>
+      <span class="type">UUID</span>
+      <span class="badge fk">FK</span>
+    </div>
+    <div class="row">
+      <span>UserId</span>
+      <span class="type">UUID</span>
+      <span class="badge fk">FK</span>
+    </div>
+    <div class="row">
+      <span>QuestionId</span>
+      <span class="type">UUID</span>
+      <span class="badge fk">FK</span>
+    </div>
+    <div class="row">
+      <span>AnswerOptionId</span>
+      <span class="type">UUID</span>
+      <span class="badge fk">FK</span>
+    </div>
+    <div class="row">
+      <span>IsCorrect</span>
+      <span class="type">BOOLEAN</span>
+    </div>
+    <div class="row">
+      <span>AnsweredAt</span>
+      <span class="type">DATETIME</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="relationship">
+  🔗 Relationship:
+  <strong>Categories (1) → (N) Questions → (N) AnswerOptions</strong><br/>
+  <strong>Matches (1) → (N) PlayerAnswers</strong><br/>
+  A player answers multiple questions per match.
+</div>
+
+</body>
+</html>
