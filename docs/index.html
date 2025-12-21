@@ -27,8 +27,8 @@
       <span class="badge pk">PK</span>
     </div>
     <div class="row">
-      <span>Username</span>
-      <span class="type">VARCHAR(50)</span>
+      <span>Name</span>
+      <span class="type">VARCHAR(100)</span>
     </div>
     <div class="row">
       <span>Email</span>
@@ -39,11 +39,43 @@
       <span class="type">TEXT</span>
     </div>
     <div class="row">
-      <span>EmailVerified</span>
-      <span class="type">BOOLEAN</span>
+      <span>ProfileImageUrl</span>
+      <span class="type">TEXT</span>
+    </div>
+    <div class="row">
+      <span>AuthProvider</span>
+      <span class="type">VARCHAR(50)</span>
+    </div>
+    <div class="row">
+      <span>ExternalId</span>
+      <span class="type">VARCHAR(255)</span>
+    </div>
+    <div class="row">
+      <span>Bio</span>
+      <span class="type">TEXT</span>
+    </div>
+    <div class="row">
+      <span>Location</span>
+      <span class="type">VARCHAR(100)</span>
+    </div>
+    <div class="row">
+      <span>DateOfBirth</span>
+      <span class="type">DATE</span>
+    </div>
+    <div class="row">
+      <span>LastLoginAt</span>
+      <span class="type">TIMESTAMP</span>
+    </div>
+    <div class="row">
+      <span>PreferredLanguage</span>
+      <span class="type">VARCHAR(10)</span>
     </div>
     <div class="row">
       <span>CreatedAt</span>
+      <span class="type">TIMESTAMP</span>
+    </div>
+    <div class="row">
+      <span>UpdatedAt</span>
       <span class="type">TIMESTAMP</span>
     </div>
   </div>
@@ -289,23 +321,51 @@
           <span class="emoji">👤</span>
           <strong>Users</strong>
         </div>
-        <p class="card-description">Central table storing user account information.</p>
+        <p class="card-description">Central table storing user account information and profiles.</p>
         <div class="field-list">
           <div class="field-item">
-            <code>Username</code>
-            <span>Unique identifier for user login</span>
+            <code>Name</code>
+            <span>User's display name</span>
           </div>
           <div class="field-item">
             <code>Email</code>
-            <span>User's email for authentication</span>
+            <span>User's email for authentication and notifications</span>
           </div>
           <div class="field-item">
             <code>PasswordHash</code>
-            <span>Encrypted password for security</span>
+            <span>Encrypted password (null for OAuth users)</span>
           </div>
           <div class="field-item">
-            <code>EmailVerified</code>
-            <span>Email confirmation status</span>
+            <code>ProfileImageUrl</code>
+            <span>URL to user's profile picture</span>
+          </div>
+          <div class="field-item">
+            <code>AuthProvider</code>
+            <span>Authentication method (local, google, github, microsoft)</span>
+          </div>
+          <div class="field-item">
+            <code>ExternalId</code>
+            <span>OAuth provider user ID (null for local auth)</span>
+          </div>
+          <div class="field-item">
+            <code>Bio</code>
+            <span>User biography or description</span>
+          </div>
+          <div class="field-item">
+            <code>Location</code>
+            <span>User's geographic location</span>
+          </div>
+          <div class="field-item">
+            <code>DateOfBirth</code>
+            <span>User's date of birth</span>
+          </div>
+          <div class="field-item">
+            <code>LastLoginAt</code>
+            <span>Most recent login timestamp</span>
+          </div>
+          <div class="field-item">
+            <code>PreferredLanguage</code>
+            <span>User's preferred UI language</span>
           </div>
         </div>
       </div>

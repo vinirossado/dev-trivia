@@ -40,11 +40,19 @@ erDiagram
 
     Users {
         uuid Id PK
-        varchar Username
+        varchar Name
         varchar Email
         text PasswordHash
-        boolean EmailVerified
+        text ProfileImageUrl
+        varchar AuthProvider
+        varchar ExternalId
+        text Bio
+        varchar Location
+        date DateOfBirth
+        timestamp LastLoginAt
+        varchar PreferredLanguage
         timestamp CreatedAt
+        timestamp UpdatedAt
     }
 
     AuthSessions {
