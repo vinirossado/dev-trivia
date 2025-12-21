@@ -1,0 +1,7 @@
+﻿services:
+  devtrivia.api:
+    image: devtrivia.api
+    build:
+      context: .
+      dockerfile: DevTrivia.API/Dockerfile
+
