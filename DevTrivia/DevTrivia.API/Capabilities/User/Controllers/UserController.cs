@@ -26,7 +26,6 @@ public class UserController : ControllerBase
     /// </summary>
     [HttpPost("login")]
     [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
@@ -41,10 +40,6 @@ public class UserController : ControllerBase
         {
             var response = await _userService.LoginAsync(request, cancellationToken);
             return Ok(new ApiResponse<LoginResponse>(true, response, "Login successful"));
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return Unauthorized(new ApiResponse<object>(false, null, ex.Message));
         }
         catch (Exception ex)
         {
