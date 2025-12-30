@@ -7,6 +7,7 @@ namespace DevTrivia.API.Migrations;
 public class TriviaDbContext(DbContextOptions<TriviaDbContext> options) : DbContext(options)
 {
     public DbSet<User> Users { get; set; }
+    public DbSet<Capabilities.Category.Database.Entities> Categories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -33,5 +34,6 @@ public class TriviaDbContext(DbContextOptions<TriviaDbContext> options) : DbCont
     private static void Configure(ModelBuilder modelBuilder)
     {
         new UserConf().Configure(modelBuilder.Entity<User>());
+        new CategoryConf().Configure(modelBuilder.Entity<Category>());
     }
 }
