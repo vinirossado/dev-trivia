@@ -1,3 +1,6 @@
+using DevTrivia.API.Capabilities.Category.Database.Entities;
+using DevTrivia.API.Capabilities.Category.Database.EntityTypeConfiguration;
+using DevTrivia.API.Capabilities.Question.Database.Entities;
 using DevTrivia.API.Capabilities.User.Database.Entities;
 using DevTrivia.API.Capabilities.User.Database.EntityTypeConfiguration;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +10,8 @@ namespace DevTrivia.API.Migrations;
 public class TriviaDbContext(DbContextOptions<TriviaDbContext> options) : DbContext(options)
 {
     public DbSet<User> Users { get; set; }
-    public DbSet<Capabilities.Category.Database.Entities> Categories { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<Question> Questions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
