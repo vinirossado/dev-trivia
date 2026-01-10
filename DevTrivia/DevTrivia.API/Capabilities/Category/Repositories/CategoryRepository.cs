@@ -1,6 +1,8 @@
 ﻿using DevTrivia.API.Capabilities.Category.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.User.Repositories.Interfaces;
+using DevTrivia.API.Infrastructure.Logging;
 using DevTrivia.API.Migrations;
+using Microsoft.EntityFrameworkCore;
 
 namespace DevTrivia.API.Capabilities.Category.Repositories;
 
@@ -15,29 +17,33 @@ public sealed class CategoryRepository : ICategoryRepository
         _logger = logger;
     }
 
-    Task<Database.Entities.Category?> GetByIdAsync(long id, CancellationToken cancellationToken)
+    public async Task<IEnumerable<Database.Entities.Category?>> GetAll(CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return await _context.Categories.ToListAsync(cancellationToken);
     }
 
-    Task<IEnumerable<Database.Entities.Category>> GetAll(CancellationToken cancellationToken)
+    public async Task<Database.Entities.Category> CreateAsync(Database.Entities.Category category, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+         var categoryDb =  await _context.Categories.AddAsync(category, cancellationToken);
+         await _context.SaveChangesAsync(cancellationToken);
+         return categoryDb.Entity;
     }
 
-    public Task<Database.Entities.Category> CreateAsync(Database.Entities.Category category, CancellationToken cancellationToken = default)
+    public async Task<Database.Entities.Category> UpdateAsync(Database.Entities.Category category, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        await _context.Categories.Where(c => c.Id == category.Id)
+            .ExecuteUpdateAsync(c => c
+                .SetProperty(c => c.Name, category.Name)
+                .SetProperty(c => c.Description, category.Description), cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+        return category;
     }
 
-    public Task<Database.Entities.Category> UpdateAsync(Database.Entities.Category category, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
+        var category = await _context.Categories.Where(c => c.Id == id).ExecuteDeleteAsync(cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+        return true;
     }
 
     public Task<int> GetTotalCountAsync(CancellationToken cancellationToken = default)
@@ -45,13 +51,23 @@ public sealed class CategoryRepository : ICategoryRepository
         throw new NotImplementedException();
     }
 
-    Task<Database.Entities.Category?> ICategoryRepository.GetByIdAsync(long id, CancellationToken cancellationToken)
+    public async Task<Database.Entities.Category?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
-        return GetByIdAsync(id, cancellationToken);
+        return await _context.Categories.FirstOrDefaultAsync(c => c.Id == id);
     }
 
-    Task<IEnumerable<Database.Entities.Category>> ICategoryRepository.GetAll(CancellationToken cancellationToken)
+    public async Task<bool> NameExistsAsync(string name, CancellationToken cancellationToken = default)
     {
-        return GetAll(cancellationToken);
+        try
+        {
+            return await _context.Categories
+                .AsNoTracking()
+                .AnyAsync(u => u.Name == name, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.DatabaseError("checking if name exists", ex.Message, ex);
+            throw;
+        }
     }
 }
