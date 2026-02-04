@@ -1,6 +1,10 @@
 using System.Text;
 using System.Text.Json;
 using Azure.Identity;
+using DevTrivia.API.Capabilities.Category.Repositories;
+using DevTrivia.API.Capabilities.Category.Repositories.Interfaces;
+using DevTrivia.API.Capabilities.Category.Services;
+using DevTrivia.API.Capabilities.Category.Services.Interfaces;
 using DevTrivia.API.Capabilities.User.Repositories;
 using DevTrivia.API.Capabilities.User.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.User.Services;
@@ -73,6 +77,9 @@ builder.Services.AddDbContext<TriviaDbContext>(options =>
 // Register User Repositories and Services
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
