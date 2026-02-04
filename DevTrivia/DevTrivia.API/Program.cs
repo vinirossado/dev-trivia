@@ -1,10 +1,12 @@
-using System.Text;
-using System.Text.Json;
 using Azure.Identity;
 using DevTrivia.API.Capabilities.Category.Repositories;
 using DevTrivia.API.Capabilities.Category.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Category.Services;
 using DevTrivia.API.Capabilities.Category.Services.Interfaces;
+using DevTrivia.API.Capabilities.Question.Repositories;
+using DevTrivia.API.Capabilities.Question.Repositories.Interfaces;
+using DevTrivia.API.Capabilities.Question.Services.Interfaces;
+using DevTrivia.API.Capabilities.Questions.Services;
 using DevTrivia.API.Capabilities.User.Repositories;
 using DevTrivia.API.Capabilities.User.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.User.Services;
@@ -16,6 +18,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Text;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,6 +84,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddScoped<IQuestionService, QuestionService>();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
