@@ -24,22 +24,17 @@ public class QuestionController : ControllerBase
         _questionService = questionService;
         _logger = logger;
     }
+
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
     public async Task<ActionResult<ApiResponse<QuestionResponse>>> Create([FromBody] QuestionRequest request, CancellationToken cancellationToken)
     {
-
         try
         {
-            var question = new Database.Entities.Question
-            {
-                Title = request.Title.ToLower(),
-                Description = request.Description,
-                Difficulty = request.Difficulty
-            };
-            var questionDb = await _questionService.CreateAsync(question, cancellationToken);
+            var questionDb = await _questionService.CreateAsync(request, cancellationToken);
+            
             return CreatedAtAction(nameof(Create), new ApiResponse<QuestionResponse>(true, new QuestionResponse
             {
                 Id = questionDb.Id,
@@ -48,7 +43,7 @@ public class QuestionController : ControllerBase
                 Difficulty = questionDb.Difficulty,
                 //CategoryId = questionDb.CategoryId
             }, "Category created successfully"));
-    }
+        }
         catch (InvalidOperationException ex)
         {
             return NotFound(new ApiResponse<object>(false, null, ex.Message));
@@ -56,9 +51,9 @@ public class QuestionController : ControllerBase
         catch (Exception ex)
         {
             _logger.DatabaseError("Update Category", ex.Message, ex);
-            return StatusCode((int) HttpStatusCode.InternalServerError, new ApiResponse<object>(false, null, ex.Message));
+            
+            return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse<object>(false, null, ex.Message));
         }
-
     }
 
     [HttpPut("{id}")]
@@ -71,6 +66,7 @@ public class QuestionController : ControllerBase
         try
         {
             var questionUpdate = await _questionService.UpdateAsync(request, id, cancellationToken);
+            
             return Ok(new ApiResponse<QuestionResponse>(true, new QuestionResponse
             {
                 Id = questionUpdate.Id,
@@ -85,9 +81,11 @@ public class QuestionController : ControllerBase
         catch (Exception ex)
         {
             _logger.DatabaseError("Update Category", ex.Message, ex);
+            
             return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse<object>(false, null, ex.Message));
         }
     }
+
     [HttpDelete]
     //[Authorize]
     [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status201Created)]
@@ -98,6 +96,7 @@ public class QuestionController : ControllerBase
         try
         {
             var questionDelete = await _questionService.DeleteAsync(id, cancellationToken);
+            
             return Ok(new ApiResponse<bool>(true, questionDelete, "Category deleted successfully"));
             //return Ok("Category retrieved successfully");
         }
@@ -111,6 +110,7 @@ public class QuestionController : ControllerBase
             return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse<object>(false, null, ex.Message));
         }
     }
+
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
@@ -128,6 +128,7 @@ public class QuestionController : ControllerBase
             return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse<object>(false, null, ex.Message));
         }
     }
+
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]

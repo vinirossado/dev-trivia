@@ -1,28 +1,15 @@
-﻿using Azure.Core;
-using DevTrivia.API.Capabilities.Category.Database.Entities;
-using DevTrivia.API.Capabilities.Question.Models;
+﻿using DevTrivia.API.Capabilities.Question.Models;
 using DevTrivia.API.Capabilities.Question.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Question.Services.Interfaces;
-using DevTrivia.API.Capabilities.User.Models;
-using DevTrivia.API.Capabilities.User.Repositories;
-using DevTrivia.API.Capabilities.User.Repositories.Interfaces;
-using DevTrivia.API.Capabilities.User.Services.Interfaces;
-using DevTrivia.API.Infrastructure.Logging;
-using Jose;
-using Microsoft.Identity.Client;
-using System.Security.Cryptography;
-using System.Text;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
-namespace DevTrivia.API.Capabilities.Questions.Services;
+namespace DevTrivia.API.Capabilities.Question.Services;
 
-public sealed class QuestionService : Question.Services.Interfaces.IQuestionService
+public sealed class QuestionService : IQuestionService
 {
     private readonly IQuestionRepository _questionRepository;
     private readonly ILogger<QuestionService> _logger;
     private readonly IConfiguration _configuration;
     private readonly TimeProvider _timeProvider;
-    private object _questionService;
 
     public QuestionService(
         IQuestionRepository questionRepository,
@@ -35,13 +22,24 @@ public sealed class QuestionService : Question.Services.Interfaces.IQuestionServ
         _configuration = configuration;
         _timeProvider = timeProvider;
     }
-    public async Task<Question.Database.Entities.Question> CreateAsync(Question.Database.Entities.Question question, CancellationToken cancellationToken = default)
+
+    public async Task<Question.Database.Entities.Question> CreateAsync(QuestionRequest request, CancellationToken cancellationToken = default)
     {
-        if (await _questionRepository.NameExistsAsync(question.Title, cancellationToken))
+        if (await _questionRepository.NameExistsAsync(request.Title, cancellationToken))
         {
             throw new InvalidOperationException("Category already registered");
         }
+
+        var question = new Question.Database.Entities.Question
+        {
+            CategoryId = request.CategoryId,
+            Title = request.Title.ToLower(),
+            Description = request.Description,
+            Difficulty = request.Difficulty
+        };
+
         await _questionRepository.CreateAsync(question, cancellationToken);
+
         return question;
     }
 
@@ -52,7 +50,9 @@ public sealed class QuestionService : Question.Services.Interfaces.IQuestionServ
         {
             throw new KeyNotFoundException($"Category with id {id} not found.");
         }
+
         await _questionRepository.DeleteAsync(id, cancellationToken);
+
         return true;
     }
 
@@ -68,12 +68,8 @@ public sealed class QuestionService : Question.Services.Interfaces.IQuestionServ
         {
             throw new KeyNotFoundException($"Category with id {id} not found.");
         }
-        return question;
-    }
 
-    public Task<int> GetTotalCountAsync(CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
+        return question;
     }
 
     public async Task<Question.Database.Entities.Question> UpdateAsync(QuestionRequest question, long id, CancellationToken cancellationToken = default)
@@ -83,18 +79,9 @@ public sealed class QuestionService : Question.Services.Interfaces.IQuestionServ
         {
             throw new KeyNotFoundException($"Category with id {id} not found.");
         }
+
         questionDb.Title = question.Title;
         questionDb.Description = question.Description;
         return await _questionRepository.UpdateAsync(questionDb, cancellationToken);
-    }
-
-    Task<Question.Database.Entities.Question?> IQuestionService.GetByIdAsync(long id, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    Task<Question.Database.Entities.Question> IQuestionService.UpdateAsync(QuestionRequest question, long id, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
     }
 }

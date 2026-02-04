@@ -1,6 +1,7 @@
 using DevTrivia.API.Capabilities.Category.Database.Entities;
 using DevTrivia.API.Capabilities.Category.Database.EntityTypeConfiguration;
 using DevTrivia.API.Capabilities.Question.Database.Entities;
+using DevTrivia.API.Capabilities.Question.Database.EntityTypeConfiguration;
 using DevTrivia.API.Capabilities.User.Database.Entities;
 using DevTrivia.API.Capabilities.User.Database.EntityTypeConfiguration;
 using Microsoft.EntityFrameworkCore;
@@ -39,5 +40,6 @@ public class TriviaDbContext(DbContextOptions<TriviaDbContext> options) : DbCont
     {
         new UserConf().Configure(modelBuilder.Entity<User>());
         new CategoryConf().Configure(modelBuilder.Entity<Category>());
+        new QuestionConf().Configure(modelBuilder.Entity<Question>());
     }
 }

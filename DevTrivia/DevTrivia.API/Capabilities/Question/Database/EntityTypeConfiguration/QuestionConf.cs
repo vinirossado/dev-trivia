@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DevTrivia.API.Capabilities.Question.Database.EntityTypeConfiguration;
 
-public class QuestionConfg : IEntityTypeConfiguration<Entities.Question>
+public class QuestionConf : IEntityTypeConfiguration<Entities.Question>
 {
     public void Configure(EntityTypeBuilder<Entities.Question> builder)
     {
@@ -26,5 +26,10 @@ public class QuestionConfg : IEntityTypeConfiguration<Entities.Question>
 
         builder.Property(x => x.CategoryId)
             .IsRequired();
+
+        // Relationships
+        builder.HasOne(x => x.Category)
+            .WithMany(x => x.Questions)
+            .HasForeignKey(x => x.CategoryId);
     }
 }

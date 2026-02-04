@@ -6,7 +6,6 @@ using DevTrivia.API.Capabilities.Category.Services.Interfaces;
 using DevTrivia.API.Capabilities.Question.Repositories;
 using DevTrivia.API.Capabilities.Question.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Question.Services.Interfaces;
-using DevTrivia.API.Capabilities.Questions.Services;
 using DevTrivia.API.Capabilities.User.Repositories;
 using DevTrivia.API.Capabilities.User.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.User.Services;
@@ -20,6 +19,7 @@ using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Text;
 using System.Text.Json;
+using DevTrivia.API.Capabilities.Question.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
