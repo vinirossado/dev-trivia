@@ -1,3 +1,4 @@
+using DevTrivia.API.Capabilities.User.Database.Entities;
 using DevTrivia.API.Capabilities.User.Repositories.Interfaces;
 using DevTrivia.API.Infrastructure.Logging;
 using DevTrivia.API.Migrations;
@@ -16,7 +17,7 @@ public sealed class UserRepository : IUserRepository
         _logger = logger;
     }
 
-    public async Task<Database.Entities.User?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
+    public async Task<UserEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -32,7 +33,7 @@ public sealed class UserRepository : IUserRepository
         }
     }
 
-    public async Task<Database.Entities.User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<UserEntity?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -47,14 +48,14 @@ public sealed class UserRepository : IUserRepository
         }
     }
 
-    public async Task<IEnumerable<Database.Entities.User>> GetAllAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<UserEntity>> GetAllAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
         try
         {
             _logger.FetchingAllUsers(page, pageSize);
             return await _context.Users
                 .AsNoTracking()
-                .OrderByDescending(u => u.Ins)
+                .OrderByDescending(u => u.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync(cancellationToken);
@@ -66,11 +67,11 @@ public sealed class UserRepository : IUserRepository
         }
     }
 
-    public async Task<Database.Entities.User> CreateAsync(Database.Entities.User user, CancellationToken cancellationToken = default)
+    public async Task<UserEntity> CreateAsync(UserEntity user, CancellationToken cancellationToken = default)
     {
         try
         {
-            user.Ins = DateTime.UtcNow;
+            user.CreatedAt = DateTime.UtcNow;
             _context.Users.Add(user);
             await _context.SaveChangesAsync(cancellationToken);
             _logger.DatabaseOperationSuccess($"creating user with email {user.Email}");
@@ -83,12 +84,12 @@ public sealed class UserRepository : IUserRepository
         }
     }
 
-    public async Task<Database.Entities.User> UpdateAsync(Database.Entities.User user, CancellationToken cancellationToken = default)
+    public async Task<UserEntity> UpdateAsync(UserEntity user, CancellationToken cancellationToken = default)
     {
         try
         {
             _logger.UpdatingUser(user.Id);
-            user.Upd = DateTime.UtcNow;
+            user.UpdatedAt = DateTime.UtcNow;
             _context.Users.Update(user);
             await _context.SaveChangesAsync(cancellationToken);
             _logger.UserUpdated(user.Id);

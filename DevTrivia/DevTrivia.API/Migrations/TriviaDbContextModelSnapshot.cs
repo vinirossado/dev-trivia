@@ -22,7 +22,7 @@ namespace DevTrivia.API.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("DevTrivia.API.Capabilities.Category.Database.Entities.Category", b =>
+            modelBuilder.Entity("DevTrivia.API.Capabilities.Category.Database.Entities.CategoryEntity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -30,20 +30,20 @@ namespace DevTrivia.API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
-
-                    b.Property<DateTime>("Ins")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<DateTime?>("Upd")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
@@ -51,7 +51,45 @@ namespace DevTrivia.API.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("DevTrivia.API.Capabilities.User.Database.Entities.User", b =>
+            modelBuilder.Entity("DevTrivia.API.Capabilities.Question.Database.Entities.QuestionEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CategoryId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<int>("Difficulty")
+                        .HasMaxLength(20)
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("Questions");
+                });
+
+            modelBuilder.Entity("DevTrivia.API.Capabilities.User.Database.Entities.UserEntity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -70,6 +108,9 @@ namespace DevTrivia.API.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("timestamp with time zone");
 
@@ -81,9 +122,6 @@ namespace DevTrivia.API.Migrations
                     b.Property<string>("ExternalId")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
-
-                    b.Property<DateTime>("Ins")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("LastLoginAt")
                         .HasColumnType("timestamp with time zone");
@@ -108,7 +146,7 @@ namespace DevTrivia.API.Migrations
                     b.Property<string>("ProfileImageUrl")
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("Upd")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
@@ -120,6 +158,22 @@ namespace DevTrivia.API.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("DevTrivia.API.Capabilities.Question.Database.Entities.QuestionEntity", b =>
+                {
+                    b.HasOne("DevTrivia.API.Capabilities.Category.Database.Entities.CategoryEntity", "Category")
+                        .WithMany("Questions")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("DevTrivia.API.Capabilities.Category.Database.Entities.CategoryEntity", b =>
+                {
+                    b.Navigation("Questions");
                 });
 #pragma warning restore 612, 618
         }

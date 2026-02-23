@@ -1,21 +1,26 @@
-using System.Text;
-using System.Text.Json;
 using Azure.Identity;
 using DevTrivia.API.Capabilities.Category.Repositories;
 using DevTrivia.API.Capabilities.Category.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Category.Services;
 using DevTrivia.API.Capabilities.Category.Services.Interfaces;
+using DevTrivia.API.Capabilities.Question.Repositories;
+using DevTrivia.API.Capabilities.Question.Repositories.Interfaces;
+using DevTrivia.API.Capabilities.Question.Services.Interfaces;
 using DevTrivia.API.Capabilities.User.Repositories;
 using DevTrivia.API.Capabilities.User.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.User.Services;
 using DevTrivia.API.Capabilities.User.Services.Interfaces;
 using DevTrivia.API.Infrastructure.Swagger;
 using DevTrivia.API.Migrations;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Text;
+using System.Text.Json;
+using DevTrivia.API.Capabilities.Question.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,13 +85,22 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddScoped<IQuestionService, QuestionService>();
+
+// Add FluentValidation
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+    {
+        // Add global validation filter
+        options.Filters.Add<DevTrivia.API.Infrastructure.Filters.ValidationFilter>();
+    })
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;

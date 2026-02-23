@@ -1,23 +1,24 @@
+using DevTrivia.API.Capabilities.User.Database.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DevTrivia.API.Capabilities.User.Database.EntityTypeConfiguration;
 
-public class UserConf : IEntityTypeConfiguration<Entities.User>
+public class UserConf : IEntityTypeConfiguration<UserEntity>
 {
-    public void Configure(EntityTypeBuilder<Capabilities.User.Database.Entities.User> builder)
+    public void Configure(EntityTypeBuilder<UserEntity> builder)
     {
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.Ins).IsRequired();
+        builder.Property(x => x.Id).IsRequired();
 
         builder.Property(x => x.Name)
             .HasMaxLength(100)
             .IsRequired();
-        
+
         builder.Property(x => x.Email)
             .IsRequired()
             .HasMaxLength(255);
-        
+
         builder.Property(x => x.PasswordHash)
             .HasMaxLength(255);
 
@@ -48,6 +49,5 @@ public class UserConf : IEntityTypeConfiguration<Entities.User>
 
         builder.HasIndex(x => new { x.AuthProvider, x.ExternalId })
             .IsUnique();
-        
     }
 }

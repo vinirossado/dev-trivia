@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using DevTrivia.API.Capabilities.Trivia.Models;
+using DevTrivia.API.Capabilities.Shared.Models;
 
 namespace DevTrivia.API.Capabilities.User.Database.Entities;
 
-public sealed class User : BaseEntity
+public sealed class UserEntity : BaseEntity
 {
     public required string Name { get; set; } = string.Empty;
 
@@ -27,5 +27,4 @@ public sealed class User : BaseEntity
     public DateTime? LastLoginAt { get; set; }
 
     public string? PreferredLanguage { get; set; }
-    
 }

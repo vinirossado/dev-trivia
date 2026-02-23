@@ -1,11 +1,12 @@
-﻿using DevTrivia.API.Capabilities.Trivia.Models;
+﻿using DevTrivia.API.Capabilities.Shared.Models;
+using DevTrivia.API.Capabilities.Question.Database.Entities;
 
 namespace DevTrivia.API.Capabilities.Category.Database.Entities;
 
-public sealed class Category : BaseEntity
+public sealed class CategoryEntity : BaseEntity
 {
     public required string Name { get; set; } = string.Empty;
     public required string Description { get; set; } = string.Empty;
 
-
+    public ICollection<QuestionEntity> Questions { get; } = new List<QuestionEntity>();
 }

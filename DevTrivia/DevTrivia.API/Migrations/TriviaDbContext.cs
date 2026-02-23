@@ -1,6 +1,7 @@
 using DevTrivia.API.Capabilities.Category.Database.Entities;
 using DevTrivia.API.Capabilities.Category.Database.EntityTypeConfiguration;
 using DevTrivia.API.Capabilities.Question.Database.Entities;
+using DevTrivia.API.Capabilities.Question.Database.EntityTypeConfiguration;
 using DevTrivia.API.Capabilities.User.Database.Entities;
 using DevTrivia.API.Capabilities.User.Database.EntityTypeConfiguration;
 using Microsoft.EntityFrameworkCore;
@@ -9,9 +10,9 @@ namespace DevTrivia.API.Migrations;
 
 public class TriviaDbContext(DbContextOptions<TriviaDbContext> options) : DbContext(options)
 {
-    public DbSet<User> Users { get; set; }
-    public DbSet<Category> Categories { get; set; }
-    public DbSet<Question> Questions { get; set; }
+    public DbSet<UserEntity> Users { get; set; }
+    public DbSet<CategoryEntity> Categories { get; set; }
+    public DbSet<QuestionEntity> Questions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -37,7 +38,8 @@ public class TriviaDbContext(DbContextOptions<TriviaDbContext> options) : DbCont
 
     private static void Configure(ModelBuilder modelBuilder)
     {
-        new UserConf().Configure(modelBuilder.Entity<User>());
-        new CategoryConf().Configure(modelBuilder.Entity<Category>());
+        new UserConf().Configure(modelBuilder.Entity<UserEntity>());
+        new CategoryConf().Configure(modelBuilder.Entity<CategoryEntity>());
+        new QuestionConf().Configure(modelBuilder.Entity<QuestionEntity>());
     }
 }

@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using DevTrivia.API.Capabilities.User.Database.Entities;
 using DevTrivia.API.Capabilities.User.Models;
 using DevTrivia.API.Capabilities.User.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.User.Services.Interfaces;
@@ -67,7 +68,7 @@ public sealed class UserService : IUserService
             throw new InvalidOperationException("Email already registered");
         }
 
-        var user = new Database.Entities.User
+        var user = new UserEntity
         {
             Name = request.Name,
             Email = request.Email,
@@ -75,7 +76,7 @@ public sealed class UserService : IUserService
             AuthProvider = "local",
             ExternalId = null,
             PreferredLanguage = request.PreferredLanguage,
-            Ins = _timeProvider.GetUtcNow().UtcDateTime
+            CreatedAt = _timeProvider.GetUtcNow().UtcDateTime
         };
 
         var createdUser = await _userRepository.CreateAsync(user, cancellationToken);
@@ -169,7 +170,7 @@ public sealed class UserService : IUserService
         return true;
     }
 
-    private string GenerateJwtToken(Database.Entities.User user)
+    private string GenerateJwtToken(UserEntity user)
     {
         try
         {
@@ -233,7 +234,7 @@ public sealed class UserService : IUserService
         }
     }
 
-    private static UserDto MapToDto(Database.Entities.User user)
+    private static UserDto MapToDto(UserEntity user)
     {
         return new UserDto
         {
@@ -246,8 +247,8 @@ public sealed class UserService : IUserService
             DateOfBirth = user.DateOfBirth,
             LastLoginAt = user.LastLoginAt,
             PreferredLanguage = user.PreferredLanguage,
-            CreatedAt = user.Ins,
-            UpdatedAt = user.Upd
+            CreatedAt = user.CreatedAt,
+            UpdatedAt = user.UpdatedAt
         };
     }
 }
