@@ -1,13 +1,9 @@
-﻿using DevTrivia.API.Capabilities.Question.Database.Entities;
+﻿using DevTrivia.API.Capabilities.Question.Extensions;
 using DevTrivia.API.Capabilities.Question.Models;
 using DevTrivia.API.Capabilities.Question.Services.Interfaces;
-using DevTrivia.API.Capabilities.Trivia.Models;
-using DevTrivia.API.Capabilities.User.Models;
+using DevTrivia.API.Capabilities.Shared.Models;
 using DevTrivia.API.Infrastructure.Logging;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq.Expressions;
 using System.Net;
 
 namespace DevTrivia.API.Capabilities.Question.Controllers;
@@ -25,129 +21,172 @@ public class QuestionController : ControllerBase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Create a new question
+    /// </summary>
     [HttpPost]
-    [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<ApiResponse<QuestionResponse>>> Create([FromBody] QuestionRequest request, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(ApiResponse<QuestionResponse>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<ApiResponse<QuestionResponse>>> Create(
+        [FromBody] QuestionRequest request, 
+        CancellationToken cancellationToken)
     {
         try
         {
-            var questionDb = await _questionService.CreateAsync(request, cancellationToken);
+            var createdQuestion = await _questionService.CreateAsync(request, cancellationToken);
+            var response = createdQuestion.ToResponse();
             
-            return CreatedAtAction(nameof(Create), new ApiResponse<QuestionResponse>(true, new QuestionResponse
-            {
-                Id = questionDb.Id,
-                Title = questionDb.Title,
-                Description = questionDb.Description,
-                Difficulty = questionDb.Difficulty,
-                //CategoryId = questionDb.CategoryId
-            }, "Category created successfully"));
+            return CreatedAtAction(
+                nameof(GetById), 
+                new { id = response.Id }, 
+                ApiResponse<QuestionResponse>.SuccessResponse(response, "Question created successfully"));
         }
         catch (InvalidOperationException ex)
         {
-            return NotFound(new ApiResponse<object>(false, null, ex.Message));
+            return Conflict(ApiResponse.ErrorResponse(ex.Message));
         }
         catch (Exception ex)
         {
-            _logger.DatabaseError("Update Category", ex.Message, ex);
-            
-            return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse<object>(false, null, ex.Message));
+            _logger.DatabaseError("creating question", ex.Message, ex);
+            return StatusCode((int)HttpStatusCode.InternalServerError, 
+                ApiResponse.ErrorResponse("An error occurred while creating the question"));
         }
     }
 
+    /// <summary>
+    /// Update an existing question
+    /// </summary>
     [HttpPut("{id}")]
-    //[Authorize]
-    [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Update(long id, [FromBody] QuestionRequest request, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(ApiResponse<QuestionResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Update(
+        long id, 
+        [FromBody] QuestionRequest request, 
+        CancellationToken cancellationToken)
     {
         try
         {
-            var questionUpdate = await _questionService.UpdateAsync(request, id, cancellationToken);
+            var updatedQuestion = await _questionService.UpdateAsync(request, id, cancellationToken);
+            var response = updatedQuestion.ToResponse();
             
-            return Ok(new ApiResponse<QuestionResponse>(true, new QuestionResponse
-            {
-                Id = questionUpdate.Id,
-                Title = questionUpdate.Title,
-                Description = questionUpdate.Description
-            }, "Category updated successfully"));
+            return Ok(ApiResponse<QuestionResponse>.SuccessResponse(response, "Question updated successfully"));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new ApiResponse<object>(false, null, ex.Message));
+            return NotFound(ApiResponse.ErrorResponse(ex.Message));
         }
         catch (Exception ex)
         {
-            _logger.DatabaseError("Update Category", ex.Message, ex);
-            
-            return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse<object>(false, null, ex.Message));
+            _logger.DatabaseError("updating question", ex.Message, ex);
+            return StatusCode((int)HttpStatusCode.InternalServerError, 
+                ApiResponse.ErrorResponse("An error occurred while updating the question"));
         }
     }
+    
+    // [HttpPut("{id}")]
+    // //[Authorize]
+    // [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status201Created)]
+    // [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    // [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
+    // public async Task<IActionResult> Update(long id, [FromBody] QuestionRequest request, CancellationToken cancellationToken)
+    // {
+    //     try
+    //     {
+    //         var questionUpdate = await _questionService.UpdateAsync(request, id, cancellationToken);
+    //         
+    //         return Ok(new ApiResponse<QuestionResponse>(true, new QuestionResponse
+    //         {
+    //             Id = questionUpdate.Id,
+    //             Title = questionUpdate.Title,
+    //             Description = questionUpdate.Description
+    //         }, "Category updated successfully"));
+    //     }
+    //     catch (KeyNotFoundException ex)
+    //     {
+    //         return NotFound(new ApiResponse<object>(false, null, ex.Message));
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _logger.DatabaseError("Update Category", ex.Message, ex);
+    //         
+    //         return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse<object>(false, null, ex.Message));
+    //     }
+    // }
 
-    [HttpDelete]
-    //[Authorize]
-    [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
+    /// <summary>
+    /// Delete a question by ID
+    /// </summary>
+    [HttpDelete("{id}")]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
     {
         try
         {
-            var questionDelete = await _questionService.DeleteAsync(id, cancellationToken);
-            
-            return Ok(new ApiResponse<bool>(true, questionDelete, "Category deleted successfully"));
-            //return Ok("Category retrieved successfully");
+            var deleted = await _questionService.DeleteAsync(id, cancellationToken);
+            return Ok(ApiResponse<bool>.SuccessResponse(deleted, "Question deleted successfully"));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new ApiResponse<object>(false, null, ex.Message));
+            return NotFound(ApiResponse.ErrorResponse(ex.Message));
         }
         catch (Exception ex)
         {
-            _logger.DatabaseError("Delete Category", ex.Message, ex);
-            return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse<object>(false, null, ex.Message));
+            _logger.DatabaseError("deleting question", ex.Message, ex);
+            return StatusCode((int)HttpStatusCode.InternalServerError, 
+                ApiResponse.ErrorResponse("An error occurred while deleting the question"));
         }
     }
 
+    /// <summary>
+    /// Get all questions
+    /// </summary>
     [HttpGet]
-    [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Searches(CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<QuestionResponse>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         try
         {
-            var questions = await _questionService.GetAll(cancellationToken);
-            return Ok(new ApiResponse<IEnumerable<Database.Entities.Question>>(true, questions, "Categories retrieved successfully"));
+            var questions = await _questionService.GetAllAsync(cancellationToken);
+            var response = questions.ToResponseList();
+            
+            return Ok(ApiResponse<IEnumerable<QuestionResponse>>.SuccessResponse(
+                response, "Questions retrieved successfully"));
         }
         catch (Exception ex)
         {
-            _logger.DatabaseError("Searche Category", ex.Message, ex);
-            return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse<object>(false, null, ex.Message));
+            _logger.DatabaseError("retrieving questions", ex.Message, ex);
+            return StatusCode((int)HttpStatusCode.InternalServerError, 
+                ApiResponse.ErrorResponse("An error occurred while retrieving questions"));
         }
     }
 
+    /// <summary>
+    /// Get a question by ID
+    /// </summary>
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> SearchesId(long id, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(ApiResponse<QuestionResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
     {
         try
         {
             var question = await _questionService.GetByIdAsync(id, cancellationToken);
-            return Ok(new ApiResponse<Database.Entities.Question>(true, question, "Category retrieved successfully"));
+            var response = question!.ToResponse();
+            
+            return Ok(ApiResponse<QuestionResponse>.SuccessResponse(response, "Question retrieved successfully"));
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new ApiResponse<object>(false, null, ex.Message));
+            return NotFound(ApiResponse.ErrorResponse(ex.Message));
         }
         catch (Exception ex)
         {
-            _logger.DatabaseError("Searche Category", ex.Message, ex);
-            return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse<object>(false, null, ex.Message));
+            _logger.DatabaseError("retrieving question", ex.Message, ex);
+            return StatusCode((int)HttpStatusCode.InternalServerError, 
+                ApiResponse.ErrorResponse("An error occurred while retrieving the question"));
         }
     }
 }

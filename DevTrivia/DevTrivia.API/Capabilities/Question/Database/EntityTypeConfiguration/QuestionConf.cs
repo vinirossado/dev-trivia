@@ -1,16 +1,15 @@
-﻿using DevTrivia.API.Capabilities.Category.Database.Entities;
-using DevTrivia.API.Capabilities.Question.Database.Entities;
+﻿using DevTrivia.API.Capabilities.Question.Database.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DevTrivia.API.Capabilities.Question.Database.EntityTypeConfiguration;
 
-public class QuestionConf : IEntityTypeConfiguration<Entities.Question>
+public class QuestionConf : IEntityTypeConfiguration<QuestionEntity>
 {
-    public void Configure(EntityTypeBuilder<Entities.Question> builder)
+    public void Configure(EntityTypeBuilder<QuestionEntity> builder)
     {
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.Ins).IsRequired();
+        builder.Property(x => x.Id).IsRequired();
 
         builder.Property(x => x.Title)
             .HasMaxLength(255)

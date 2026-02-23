@@ -12,6 +12,7 @@ using DevTrivia.API.Capabilities.User.Services;
 using DevTrivia.API.Capabilities.User.Services.Interfaces;
 using DevTrivia.API.Infrastructure.Swagger;
 using DevTrivia.API.Migrations;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -87,12 +88,19 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 
+// Add FluentValidation
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+    {
+        // Add global validation filter
+        options.Filters.Add<DevTrivia.API.Infrastructure.Filters.ValidationFilter>();
+    })
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
