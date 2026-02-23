@@ -1,4 +1,5 @@
-﻿using DevTrivia.API.Capabilities.Question.Database.Entities;
+﻿﻿using DevTrivia.API.Capabilities.Question.Database.Entities;
+using DevTrivia.API.Capabilities.Question.Enums;
 using DevTrivia.API.Capabilities.Question.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Shared.Repositories;
 using DevTrivia.API.Infrastructure.Logging;
@@ -37,11 +38,46 @@ public sealed class QuestionRepository : BaseRepository<QuestionEntity>, IQuesti
             .Include(q => q.Category)
             .ToListAsync(cancellationToken);
     }
-
+    
     public override async Task<QuestionEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
         return await DbSet
             .Include(q => q.Category)
             .FirstOrDefaultAsync(q => q.Id == id, cancellationToken);
+    }
+    
+    public async Task<IEnumerable<QuestionEntity>> GetByCategoryIdAsync(long categoryId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await DbSet
+                .Include(q => q.Category)
+                .Where(q => q.CategoryId == categoryId)
+                .ToListAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.DatabaseError("retrieving questions by category", ex.Message, ex);
+            throw;
+        }
+    }
+    
+    public async Task<IEnumerable<QuestionEntity>> GetByCategoryAndDifficultyAsync(
+        long categoryId, 
+        DifficultyEnum difficulty, 
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await DbSet
+                .Include(q => q.Category)
+                .Where(q => q.CategoryId == categoryId && q.Difficulty == difficulty)
+                .ToListAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.DatabaseError("retrieving questions by category and difficulty", ex.Message, ex);
+            throw;
+        }
     }
 }

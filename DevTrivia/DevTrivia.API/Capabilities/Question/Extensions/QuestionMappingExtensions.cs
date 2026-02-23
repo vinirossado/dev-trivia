@@ -26,7 +26,7 @@ public static class QuestionMappingExtensions
         {
             Title = request.Title,
             Description = request.Description,
-            Difficulty = request.Difficulty.ToLower(),
+            Difficulty = request.Difficulty,
             CategoryId = request.CategoryId
         };
     }

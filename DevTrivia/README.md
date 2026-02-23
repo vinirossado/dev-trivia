@@ -180,6 +180,8 @@ DevTrivia.API/
 │   │   └── Database/
 │   │       ├── Entities/      # Entidades EF Core
 │   │       └── EntityTypeConfiguration/
+│   ├── Category/              # Gerenciamento de categorias
+│   ├── Question/              # Gerenciamento de perguntas
 │   └── Trivia/
 │       └── Models/            # Models compartilhados
 ├── Infrastructure/
@@ -195,6 +197,27 @@ Controller → Service → Repository → Database
      ↓          ↓           ↓
    DTOs    Business Logic  EF Core
 ```
+
+## 🗄️ Banco de Dados
+
+Para informações detalhadas sobre o esquema do banco de dados, incluindo todas as tabelas planejadas e implementadas, consulte:
+
+📖 **[DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md)** - Documentação completa do esquema
+
+### Status Atual
+
+| Tabela | Status | Descrição |
+|--------|--------|-----------|
+| Users | ✅ Implementado | Gerenciamento de usuários e autenticação |
+| Categories | ✅ Implementado | Categorias de perguntas (C#, JavaScript, etc) |
+| Questions | ✅ Implementado | Perguntas do trivia |
+| **AnswerOptions** | ❌ **PLANEJADO** | **Alternativas e resposta correta** |
+| Matches | ❌ Planejado | Sessões de jogo |
+| PlayerAnswers | ❌ Planejado | Registro de respostas |
+| PlayerStats | ❌ Planejado | Estatísticas e ranking |
+| AuthSessions | ❌ Planejado | Refresh tokens |
+
+> ⚠️ **Nota**: Atualmente o sistema não possui tabela de alternativas (AnswerOptions), que é crítica para o funcionamento do jogo. Veja DATABASE_SCHEMA.md para detalhes.
 
 ## 🔐 Segurança
 

@@ -5,8 +5,6 @@ namespace DevTrivia.API.Capabilities.Question.Validators;
 
 public class QuestionRequestValidator : AbstractValidator<QuestionRequest>
 {
-    private static readonly string[] ValidDifficulties = { "easy", "medium", "hard" };
-
     public QuestionRequestValidator()
     {
         RuleFor(x => x.Title)
@@ -16,13 +14,11 @@ public class QuestionRequestValidator : AbstractValidator<QuestionRequest>
 
         RuleFor(x => x.Description)
             .NotEmpty().WithMessage("Description is required")
-            .MaximumLength(255).WithMessage("Description must not exceed 255 characters")
+            .MaximumLength(500).WithMessage("Description must not exceed 500 characters")
             .MinimumLength(10).WithMessage("Description must be at least 10 characters");
 
         RuleFor(x => x.Difficulty)
-            .NotEmpty().WithMessage("Difficulty is required")
-            .Must(d => ValidDifficulties.Contains(d.ToLower()))
-            .WithMessage($"Difficulty must be one of: {string.Join(", ", ValidDifficulties)}");
+            .IsInEnum().WithMessage("Difficulty must be a valid value (Easy=1, Medium=2, Hard=3, Super=4)");
 
         RuleFor(x => x.CategoryId)
             .GreaterThan(0).WithMessage("Valid CategoryId is required");

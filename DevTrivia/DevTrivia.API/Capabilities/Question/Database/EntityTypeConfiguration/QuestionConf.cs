@@ -21,6 +21,7 @@ public class QuestionConf : IEntityTypeConfiguration<QuestionEntity>
 
         builder.Property(x => x.Difficulty)
             .HasMaxLength(20)
+            .HasColumnType("integer")
             .IsRequired();
 
         builder.Property(x => x.CategoryId)

@@ -31,6 +31,7 @@ public abstract class BaseRepository<TEntity> : IRepository<TEntity> where TEnti
         entity.UpdatedAt = DateTime.UtcNow;
         await DbSet.AddAsync(entity, cancellationToken);
         await Context.SaveChangesAsync(cancellationToken);
+        
         return entity;
     }
 
@@ -39,6 +40,7 @@ public abstract class BaseRepository<TEntity> : IRepository<TEntity> where TEnti
         entity.UpdatedAt = DateTime.UtcNow;
         DbSet.Update(entity);
         await Context.SaveChangesAsync(cancellationToken);
+        
         return entity;
     }
 
@@ -50,6 +52,7 @@ public abstract class BaseRepository<TEntity> : IRepository<TEntity> where TEnti
 
         DbSet.Remove(entity);
         await Context.SaveChangesAsync(cancellationToken);
+        
         return true;
     }
 
