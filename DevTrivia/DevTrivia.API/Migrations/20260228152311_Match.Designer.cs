@@ -3,6 +3,7 @@ using System;
 using DevTrivia.API.Migrations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DevTrivia.API.Migrations
 {
     [DbContext(typeof(TriviaDbContext))]
-    partial class TriviaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260228152311_Match")]
+    partial class Match
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -59,6 +62,9 @@ namespace DevTrivia.API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<long>("CategoryId")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -72,7 +78,6 @@ namespace DevTrivia.API.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Status")
-                        .HasMaxLength(20)
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -80,9 +85,9 @@ namespace DevTrivia.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SelectedCategoryId");
+                    b.HasIndex("CategoryId");
 
-                    b.ToTable("Match");
+                    b.ToTable("MatchEntity");
                 });
 
             modelBuilder.Entity("DevTrivia.API.Capabilities.Question.Database.Entities.QuestionEntity", b =>
@@ -198,7 +203,7 @@ namespace DevTrivia.API.Migrations
                 {
                     b.HasOne("DevTrivia.API.Capabilities.Category.Database.Entities.CategoryEntity", "Category")
                         .WithMany("Matches")
-                        .HasForeignKey("SelectedCategoryId")
+                        .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

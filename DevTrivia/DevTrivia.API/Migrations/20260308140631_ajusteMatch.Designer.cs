@@ -3,6 +3,7 @@ using System;
 using DevTrivia.API.Migrations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DevTrivia.API.Migrations
 {
     [DbContext(typeof(TriviaDbContext))]
-    partial class TriviaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260308140631_ajusteMatch")]
+    partial class ajusteMatch
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,13 +66,13 @@ namespace DevTrivia.API.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("EndedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp");
 
                     b.Property<long>("SelectedCategoryId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("StartedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp");
 
                     b.Property<int>("Status")
                         .HasMaxLength(20)

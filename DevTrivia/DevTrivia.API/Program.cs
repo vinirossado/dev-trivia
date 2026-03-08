@@ -21,6 +21,10 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Text;
 using System.Text.Json;
 using DevTrivia.API.Capabilities.Question.Services;
+using DevTrivia.API.Capabilities.Match.Repositories.Interfaces;
+using DevTrivia.API.Capabilities.Match.Repositories;
+using DevTrivia.API.Capabilities.Match.Services.Interfaces;
+using DevTrivia.API.Capabilities.Match.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,6 +91,8 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
+builder.Services.AddScoped<IMatchRepository, MatchRepository>();
+builder.Services.AddScoped<IMatchService, MatchService>();
 
 // Add FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
