@@ -2,7 +2,6 @@
 using DevTrivia.API.Capabilities.Question.Enums;
 using DevTrivia.API.Capabilities.Question.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Shared.Repositories;
-using DevTrivia.API.Infrastructure.Logging;
 using DevTrivia.API.Migrations;
 using Microsoft.EntityFrameworkCore;
 
