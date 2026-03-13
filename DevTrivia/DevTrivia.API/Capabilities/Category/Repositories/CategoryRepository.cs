@@ -1,7 +1,6 @@
 ﻿using DevTrivia.API.Capabilities.Category.Database.Entities;
 using DevTrivia.API.Capabilities.Category.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Shared.Repositories;
-using DevTrivia.API.Infrastructure.Logging;
 using DevTrivia.API.Migrations;
 using Microsoft.EntityFrameworkCore;
 
