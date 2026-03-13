@@ -3,6 +3,7 @@ using DevTrivia.API.Capabilities.Category.Models;
 using DevTrivia.API.Capabilities.Category.Services.Interfaces;
 using DevTrivia.API.Capabilities.Shared.Models;
 using DevTrivia.API.Infrastructure.Logging;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -25,6 +26,7 @@ public class CategoryController : ControllerBase
     /// Create a new category
     /// </summary>
     [HttpPost]
+    [Authorize]
     [ProducesResponseType(typeof(ApiResponse<CategoryResponse>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
@@ -35,8 +37,6 @@ public class CategoryController : ControllerBase
         try
         {
             var category = request.ToEntity();
-            category.Name = category.Name.ToLower();
-
             var createdCategory = await _categoryService.CreateAsync(category, cancellationToken);
             var response = createdCategory.ToResponse();
 
@@ -61,6 +61,7 @@ public class CategoryController : ControllerBase
     /// Update an existing category
     /// </summary>
     [HttpPut("{id}")]
+    [Authorize]
     [ProducesResponseType(typeof(ApiResponse<CategoryResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
@@ -92,6 +93,7 @@ public class CategoryController : ControllerBase
     /// Delete a category by ID
     /// </summary>
     [HttpDelete("{id}")]
+    [Authorize]
     [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)

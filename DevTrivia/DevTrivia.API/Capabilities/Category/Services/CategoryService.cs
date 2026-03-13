@@ -20,6 +20,8 @@ public sealed class CategoryService : ICategoryService
 
     public async Task<CategoryEntity> CreateAsync(CategoryEntity category, CancellationToken cancellationToken = default)
     {
+        category.Name = category.Name.ToLower();
+
         if (await _categoryRepository.NameExistsAsync(category.Name, cancellationToken))
         {
             throw new InvalidOperationException("Category with this name already exists");
@@ -68,7 +70,7 @@ public sealed class CategoryService : ICategoryService
             throw new KeyNotFoundException($"Category with id {id} not found");
         }
 
-        category.Name = request.Name;
+        category.Name = request.Name.ToLower();
         category.Description = request.Description;
 
         return await _categoryRepository.UpdateAsync(category, cancellationToken);

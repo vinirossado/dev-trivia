@@ -1,3 +1,5 @@
+using DevTrivia.API.Capabilities.AnswerOptions.Database.Entities;
+using DevTrivia.API.Capabilities.AnswerOptions.Database.EntityTypeConfiguration;
 using DevTrivia.API.Capabilities.Category.Database.Entities;
 using DevTrivia.API.Capabilities.Category.Database.EntityTypeConfiguration;
 using DevTrivia.API.Capabilities.Question.Database.Entities;
@@ -13,6 +15,7 @@ public class TriviaDbContext(DbContextOptions<TriviaDbContext> options) : DbCont
     public DbSet<UserEntity> Users { get; set; }
     public DbSet<CategoryEntity> Categories { get; set; }
     public DbSet<QuestionEntity> Questions { get; set; }
+    public DbSet<AnswerOptionEntity> AnswerOptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -41,5 +44,6 @@ public class TriviaDbContext(DbContextOptions<TriviaDbContext> options) : DbCont
         new UserConf().Configure(modelBuilder.Entity<UserEntity>());
         new CategoryConf().Configure(modelBuilder.Entity<CategoryEntity>());
         new QuestionConf().Configure(modelBuilder.Entity<QuestionEntity>());
+        new AnswerOptionConf().Configure(modelBuilder.Entity<AnswerOptionEntity>());
     }
 }
