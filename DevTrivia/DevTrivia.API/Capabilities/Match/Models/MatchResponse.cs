@@ -9,4 +9,5 @@ public record MatchResponse
     public DateTime EndedAt { get; init; }
     public StatusEnum Status { get; init; }
     public long SelectedCategoryId { get; init; }
+    public string? CategoryName { get; init; }
 }

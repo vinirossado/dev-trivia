@@ -1,7 +1,6 @@
-﻿using DevTrivia.API.Capabilities.Match.Database.Entities;
+using DevTrivia.API.Capabilities.Match.Database.Entities;
 using DevTrivia.API.Capabilities.Match.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Shared.Repositories;
-using DevTrivia.API.Infrastructure.Logging;
 using DevTrivia.API.Migrations;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,18 +15,17 @@ public sealed class MatchRepository : BaseRepository<MatchEntity>, IMatchReposit
         _logger = logger;
     }
 
-    public async Task<bool> NameExistsAsync(int Id, CancellationToken cancellationToken = default)
+    public override async Task<MatchEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            return await DbSet
-                .AsNoTracking()
-                .AnyAsync(c => c.Id == Id, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _logger.DatabaseError("checking if category name exists", ex.Message, ex);
-            throw;
-        }
+        return await DbSet
+            .Include(m => m.Category)
+            .FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
+    }
+
+    public override async Task<IEnumerable<MatchEntity>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(m => m.Category)
+            .ToListAsync(cancellationToken);
     }
 }

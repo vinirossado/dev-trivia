@@ -1,9 +1,9 @@
 ﻿using DevTrivia.API.Capabilities.Match.Extensions;
 using DevTrivia.API.Capabilities.Match.Models;
 using DevTrivia.API.Capabilities.Match.Services.Interfaces;
-using DevTrivia.API.Capabilities.Question.Models;
 using DevTrivia.API.Capabilities.Shared.Models;
 using DevTrivia.API.Infrastructure.Logging;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -25,6 +25,7 @@ public class MatchController : ControllerBase
     /// <summary>
     /// Create a new match
     /// </summary>
+    [Authorize]
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponse<MatchResponse>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
@@ -60,6 +61,7 @@ public class MatchController : ControllerBase
     /// <summary>
     /// Update an existing match
     /// </summary>
+    [Authorize]
     [HttpPut("{id}")]
     [ProducesResponseType(typeof(ApiResponse<MatchResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
@@ -91,6 +93,7 @@ public class MatchController : ControllerBase
     /// <summary>
     /// Delete a match by ID
     /// </summary>
+    [Authorize]
     [HttpDelete("{id}")]
     [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]

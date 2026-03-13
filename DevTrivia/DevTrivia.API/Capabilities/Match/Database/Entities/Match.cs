@@ -1,9 +1,6 @@
 ﻿using DevTrivia.API.Capabilities.Category.Database.Entities;
 using DevTrivia.API.Capabilities.Match.Enums;
-using DevTrivia.API.Capabilities.Question.Database.Entities;
-using DevTrivia.API.Capabilities.Question.Enums;
 using DevTrivia.API.Capabilities.Shared.Models;
-using Microsoft.VisualBasic;
 
 namespace DevTrivia.API.Capabilities.Match.Database.Entities;
 

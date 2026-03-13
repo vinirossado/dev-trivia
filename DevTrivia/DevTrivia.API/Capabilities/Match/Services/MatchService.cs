@@ -1,5 +1,6 @@
-﻿using Azure.Core;
+using DevTrivia.API.Capabilities.Category.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Match.Database.Entities;
+using DevTrivia.API.Capabilities.Match.Extensions;
 using DevTrivia.API.Capabilities.Match.Models;
 using DevTrivia.API.Capabilities.Match.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Match.Services.Interfaces;
@@ -9,34 +10,36 @@ namespace DevTrivia.API.Capabilities.Match.Services;
 public sealed class MatchService : IMatchService
 {
     private readonly IMatchRepository _matchRepository;
+    private readonly ICategoryRepository _categoryRepository;
     private readonly ILogger<MatchService> _logger;
 
     public MatchService(
         IMatchRepository matchRepository,
+        ICategoryRepository categoryRepository,
         ILogger<MatchService> logger)
     {
         _matchRepository = matchRepository;
+        _categoryRepository = categoryRepository;
         _logger = logger;
     }
 
     public async Task<MatchEntity> CreateAsync(MatchEntity match, CancellationToken cancellationToken = default)
     {
+        if (!match.Status.IsValid())
+            throw new InvalidOperationException($"Match with status {match.Status} is not valid");
 
-        if ((int)match.Status <= 0 || (int)match.Status > 3)
-        {
-            throw new InvalidOperationException($"Mitch with status {match.Status} cannot exist");
-        }
+        var categoryExists = await _categoryRepository.ExistsAsync(match.SelectedCategoryId, cancellationToken);
+        if (!categoryExists)
+            throw new KeyNotFoundException($"Category with id {match.SelectedCategoryId} not found");
 
         return await _matchRepository.AddAsync(match, cancellationToken);
     }
 
     public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)
     {
-        var categoryExists = await _matchRepository.ExistsAsync(id, cancellationToken);
-        if (!categoryExists)
-        {
+        var exists = await _matchRepository.ExistsAsync(id, cancellationToken);
+        if (!exists)
             throw new KeyNotFoundException($"Match with id {id} not found");
-        }
 
         return await _matchRepository.DeleteAsync(id, cancellationToken);
     }
@@ -48,13 +51,11 @@ public sealed class MatchService : IMatchService
 
     public async Task<MatchEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
-        var category = await _matchRepository.GetByIdAsync(id, cancellationToken);
-        if (category == null)
-        {
+        var match = await _matchRepository.GetByIdAsync(id, cancellationToken);
+        if (match is null)
             throw new KeyNotFoundException($"Match with id {id} not found");
-        }
 
-        return category;
+        return match;
     }
 
     public async Task<long> GetTotalCountAsync(CancellationToken cancellationToken = default)
@@ -65,14 +66,11 @@ public sealed class MatchService : IMatchService
     public async Task<MatchEntity> UpdateAsync(MatchRequest request, long id, CancellationToken cancellationToken = default)
     {
         var match = await _matchRepository.GetByIdAsync(id, cancellationToken);
-        if (match == null)
-        {
+        if (match is null)
             throw new KeyNotFoundException($"Match with id {id} not found");
-        }
-        else if ((int)request.Status <= 0 || (int)request.Status > 3)
-        {
-            throw new KeyNotFoundException($"Match with status {request.Status} cannot exist");
-        }
+
+        if (!request.Status.IsValid())
+            throw new InvalidOperationException($"Match with status {request.Status} is not valid");
 
         match.Status = request.Status;
         match.SelectedCategoryId = request.SelectedCategoryId;

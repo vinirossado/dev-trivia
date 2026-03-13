@@ -13,7 +13,8 @@ public static class MatchMappingExtensions
             StartedAt = entity.StartedAt,
             EndedAt = entity.EndedAt,
             Status = entity.Status,
-            SelectedCategoryId = entity.SelectedCategoryId
+            SelectedCategoryId = entity.SelectedCategoryId,
+            CategoryName = entity.Category?.Name
         };
     }
 
