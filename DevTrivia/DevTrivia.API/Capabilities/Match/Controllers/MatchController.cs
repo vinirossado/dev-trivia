@@ -14,11 +14,13 @@ namespace DevTrivia.API.Capabilities.Match.Controllers;
 public class MatchController : ControllerBase
 {
     private readonly IMatchService _matchService;
+    private readonly IGamePlayService _gamePlayService;
     private readonly ILogger<MatchController> _logger;
 
-    public MatchController(IMatchService matchService, ILogger<MatchController> logger)
+    public MatchController(IMatchService matchService, IGamePlayService gamePlayService, ILogger<MatchController> logger)
     {
         _matchService = matchService;
+        _gamePlayService = gamePlayService;
         _logger = logger;
     }
 
@@ -163,6 +165,129 @@ public class MatchController : ControllerBase
             _logger.DatabaseError("retrieving match", ex.Message, ex);
             return StatusCode((int)HttpStatusCode.InternalServerError,
                 ApiResponse.ErrorResponse("An error occurred while retrieving the match"));
+        }
+    }
+
+    /// <summary>
+    /// Start a match (moves from Pending to InProgress)
+    /// </summary>
+    [Authorize]
+    [HttpPost("{id}/start")]
+    [ProducesResponseType(typeof(ApiResponse<GameStartResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> StartMatch(long id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _gamePlayService.StartMatchAsync(id, cancellationToken);
+            return Ok(ApiResponse<GameStartResponse>.SuccessResponse(response, "Match started successfully"));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ApiResponse.ErrorResponse(ex.Message));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ApiResponse.ErrorResponse(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.DatabaseError("starting match", ex.Message, ex);
+            return StatusCode((int)HttpStatusCode.InternalServerError,
+                ApiResponse.ErrorResponse("An error occurred while starting the match"));
+        }
+    }
+
+    /// <summary>
+    /// Get the next unanswered question for a match
+    /// </summary>
+    [Authorize]
+    [HttpGet("{id}/next-question")]
+    [ProducesResponseType(typeof(ApiResponse<GameQuestionResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> GetNextQuestion(long id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _gamePlayService.GetNextQuestionAsync(id, cancellationToken);
+            return Ok(ApiResponse<GameQuestionResponse>.SuccessResponse(response, "Question retrieved successfully"));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ApiResponse.ErrorResponse(ex.Message));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ApiResponse.ErrorResponse(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.DatabaseError("retrieving next question", ex.Message, ex);
+            return StatusCode((int)HttpStatusCode.InternalServerError,
+                ApiResponse.ErrorResponse("An error occurred while retrieving the next question"));
+        }
+    }
+
+    /// <summary>
+    /// Submit an answer for a question in a match
+    /// </summary>
+    [Authorize]
+    [HttpPost("{id}/answer")]
+    [ProducesResponseType(typeof(ApiResponse<SubmitAnswerResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> SubmitAnswer(
+        long id,
+        [FromBody] SubmitAnswerRequest request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _gamePlayService.SubmitAnswerAsync(id, request, cancellationToken);
+            return Ok(ApiResponse<SubmitAnswerResponse>.SuccessResponse(response,
+                response.IsCorrect ? "Correct answer!" : "Wrong answer"));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ApiResponse.ErrorResponse(ex.Message));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ApiResponse.ErrorResponse(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.DatabaseError("submitting answer", ex.Message, ex);
+            return StatusCode((int)HttpStatusCode.InternalServerError,
+                ApiResponse.ErrorResponse("An error occurred while submitting the answer"));
+        }
+    }
+
+    /// <summary>
+    /// Get the results of a finished match
+    /// </summary>
+    [Authorize]
+    [HttpGet("{id}/results")]
+    [ProducesResponseType(typeof(ApiResponse<GameResultsResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetResults(long id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _gamePlayService.GetResultsAsync(id, cancellationToken);
+            return Ok(ApiResponse<GameResultsResponse>.SuccessResponse(response, "Results retrieved successfully"));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ApiResponse.ErrorResponse(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.DatabaseError("retrieving results", ex.Message, ex);
+            return StatusCode((int)HttpStatusCode.InternalServerError,
+                ApiResponse.ErrorResponse("An error occurred while retrieving the results"));
         }
     }
 }
