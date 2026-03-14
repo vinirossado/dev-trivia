@@ -42,7 +42,6 @@
     <ItemGroup>
       <Folder Include="Capabilities\User\Controllers\" />
       <Folder Include="Capabilities\User\Repositories\Interfaces\" />
-      <Folder Include="Capabilities\User\Services\Interfacs\" />
       <Folder Include="Infrastructure\Logging\" />
     </ItemGroup>
 

@@ -1,10 +1,10 @@
-using DevTrivia.API.Capabilities.Trivia.Models;
 using DevTrivia.API.Capabilities.User.Models;
 using DevTrivia.API.Capabilities.User.Services.Interfaces;
 using DevTrivia.API.Infrastructure.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using DevTrivia.API.Capabilities.Shared.Models;
 
 namespace DevTrivia.API.Capabilities.User.Controllers;
 

@@ -18,16 +18,8 @@ public sealed class CategoryRepository : BaseRepository<CategoryEntity>, ICatego
 
     public async Task<bool> NameExistsAsync(string name, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            return await DbSet
-                .AsNoTracking()
-                .AnyAsync(c => c.Name == name, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _logger.DatabaseError("checking if category name exists", ex.Message, ex);
-            throw;
-        }
+        return await DbSet
+            .AsNoTracking()
+            .AnyAsync(c => c.Name == name, cancellationToken);
     }
 }

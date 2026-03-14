@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using System.Text;
 using DevTrivia.API.Capabilities.User.Database.Entities;
 using DevTrivia.API.Capabilities.User.Models;
@@ -75,11 +74,10 @@ public sealed class UserService : IUserService
             PasswordHash = HashPassword(request.Password),
             AuthProvider = "local",
             ExternalId = null,
-            PreferredLanguage = request.PreferredLanguage,
-            CreatedAt = _timeProvider.GetUtcNow().UtcDateTime
+            PreferredLanguage = request.PreferredLanguage
         };
 
-        var createdUser = await _userRepository.CreateAsync(user, cancellationToken);
+        var createdUser = await _userRepository.AddAsync(user, cancellationToken);
         _logger.UserRegistered(createdUser.Email, createdUser.Id);
 
         return MapToDto(createdUser);
@@ -87,8 +85,9 @@ public sealed class UserService : IUserService
 
     public async Task<UserDto?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
+        _logger.FetchingUserById(id);
         var user = await _userRepository.GetByIdAsync(id, cancellationToken);
-        
+
         if (user is null)
         {
             _logger.UserNotFound(id);
@@ -104,10 +103,16 @@ public sealed class UserService : IUserService
         if (pageSize < 1) pageSize = 10;
         if (pageSize > 100) pageSize = 100;
 
-        var users = await _userRepository.GetAllAsync(page, pageSize, cancellationToken);
+        _logger.FetchingAllUsers(page, pageSize);
+        var allUsers = await _userRepository.GetAllAsync(cancellationToken);
         var totalCount = await _userRepository.GetTotalCountAsync(cancellationToken);
 
-        return (users.Select(MapToDto), totalCount);
+        var paginatedUsers = allUsers
+            .OrderByDescending(u => u.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize);
+
+        return (paginatedUsers.Select(MapToDto), (int)totalCount);
     }
 
     public async Task<UserDto> UpdateAsync(long id, UpdateUserRequest request, CancellationToken cancellationToken = default)
@@ -145,7 +150,17 @@ public sealed class UserService : IUserService
 
     public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)
     {
-        return await _userRepository.DeleteAsync(id, cancellationToken);
+        _logger.DeletingUser(id);
+        var deleted = await _userRepository.DeleteAsync(id, cancellationToken);
+
+        if (!deleted)
+        {
+            _logger.UserNotFound(id);
+            return false;
+        }
+
+        _logger.UserDeleted(id);
+        return true;
     }
 
     public async Task<bool> ChangePasswordAsync(long id, ChangePasswordRequest request, CancellationToken cancellationToken = default)
