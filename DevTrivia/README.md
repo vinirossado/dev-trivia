@@ -1,52 +1,56 @@
 # DevTrivia API
 
-API RESTful para o aplicativo DevTrivia, desenvolvida com .NET 10 e PostgreSQL.
+API RESTful para o aplicativo DevTrivia - um jogo de trivia para desenvolvedores. Desenvolvida com .NET 10 e PostgreSQL.
 
-## 🚀 Tecnologias
+## Tecnologias
 
 - **.NET 10** - Framework web
-- **Entity Framework Core 10** - ORM
-- **PostgreSQL** - Banco de dados
-- **jose-jwt** - Geração de tokens JWT
-- **BCrypt.Net** - Hash de senhas
-- **Swagger/OpenAPI** - Documentação de API
+- **ASP.NET Core** - Web API
+- **Entity Framework Core 10** - ORM com PostgreSQL (Npgsql)
+- **jose-jwt** - Tokens JWT (HS256)
+- **BCrypt.Net** - Hash de senhas (work factor 12)
+- **FluentValidation** - Validacao de input
+- **Swashbuckle** - Swagger/OpenAPI
+- **Azure Key Vault** - Gerenciamento de secrets (opcional)
 
-## 📋 Pré-requisitos
+## Pre-requisitos
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- PostgreSQL 14+ (local ou Azure)
-- Azure Key Vault (opcional, para produção)
+- PostgreSQL 14+
+- Azure Key Vault (opcional, para producao)
 
-## ⚙️ Configuração
+## Configuracao
 
-### 1. Clonar o repositório
+### 1. Clonar o repositorio
 
 ```bash
 git clone <repository-url>
 cd DevTrivia
 ```
 
-### 2. Configurar appsettings.Development.json
+### 2. Configurar appsettings.json
 
-Copie o arquivo de exemplo e preencha com suas credenciais:
-
-```bash
-cd DevTrivia.API
-cp appsettings.Development.json.example appsettings.Development.json
-```
-
-Edite `appsettings.Development.json`:
+Crie o arquivo `DevTrivia.API/appsettings.json`:
 
 ```json
 {
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=devtrivia;Port=5432;User Id=postgres;Password=sua-senha;"
+    "DefaultConnection": "Host=localhost;Port=5432;Database=devtrivia;Username=postgres;Password=sua-senha"
   },
   "JwtSettings": {
     "SecretKey": "SuaChaveSecretaDeveSerPeloMenos32CaracteresParaHS256!",
     "Issuer": "DevTrivia",
     "Audience": "DevTrivia.Users",
     "ExpirationInMinutes": 60
+  },
+  "ApiKeySettings": {
+    "Keys": ["sua-api-key-aqui"]
   }
 }
 ```
@@ -54,257 +58,268 @@ Edite `appsettings.Development.json`:
 ### 3. Criar o banco de dados
 
 ```bash
-# Aplicar migrations
-dotnet ef database update
-
-# Ou criar migration se necessário
-dotnet ef migrations add NomeDaMigracao
+dotnet ef database update --project DevTrivia.API
 ```
 
-### 4. Executar o projeto
+### 4. Executar
 
 ```bash
-dotnet run
+cd DevTrivia.API && dotnet run
 ```
 
-A API estará disponível em:
-- **HTTPS**: `https://localhost:5001`
-- **HTTP**: `http://localhost:5000`
-- **Swagger**: `https://localhost:5001/swagger`
+Swagger disponivel em: `http://localhost:5288/swagger`
 
-## 📚 API Endpoints
+## Arquitetura
 
-### Autenticação (Público)
+### Capability-based Feature-Sliced Architecture
 
-#### Registrar usuário
-```http
-POST /api/user/register
-Content-Type: application/json
+O projeto segue uma arquitetura **capability-based** (feature-sliced) com camadas. Cada dominio/feature vive isolado dentro de `Capabilities/`, com sua propria estrutura interna de camadas. Isso combina os beneficios de:
 
-{
-  "name": "João Silva",
-  "email": "joao@example.com",
-  "password": "SenhaSegura123!",
-  "preferredLanguage": "pt-BR"
-}
-```
-
-#### Login
-```http
-POST /api/user/login
-Content-Type: application/json
-
-{
-  "email": "joao@example.com",
-  "password": "SenhaSegura123!"
-}
-```
-
-**Resposta:**
-```json
-{
-  "success": true,
-  "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "tokenType": "Bearer",
-    "userId": 1,
-    "email": "joao@example.com",
-    "name": "João Silva",
-    "expiresAt": "2025-12-21T14:00:00Z"
-  },
-  "message": "Login successful"
-}
-```
-
-### Usuários (Requer autenticação)
-
-Incluir o token JWT no header:
-```
-Authorization: Bearer <seu-token>
-```
-
-#### Obter perfil do usuário autenticado
-```http
-GET /api/user/me
-```
-
-#### Obter usuário por ID
-```http
-GET /api/user/{id}
-```
-
-#### Listar todos os usuários (paginado)
-```http
-GET /api/user?page=1&pageSize=10
-```
-
-#### Atualizar perfil
-```http
-PUT /api/user/{id}
-Content-Type: application/json
-
-{
-  "name": "João Silva Atualizado",
-  "bio": "Desenvolvedor .NET",
-  "location": "São Paulo, Brasil",
-  "profileImageUrl": "https://example.com/avatar.jpg"
-}
-```
-
-#### Alterar senha
-```http
-POST /api/user/{id}/change-password
-Content-Type: application/json
-
-{
-  "currentPassword": "SenhaAntiga123!",
-  "newPassword": "NovaSenha456!"
-}
-```
-
-#### Deletar usuário
-```http
-DELETE /api/user/{id}
-```
-
-## 🏗️ Arquitetura
+- **Feature slicing**: cada feature e autonoma, facil de encontrar e modificar sem impactar outras
+- **Layered architecture**: separacao clara de responsabilidades dentro de cada feature
 
 ```
 DevTrivia.API/
-├── Capabilities/
-│   ├── User/
-│   │   ├── Controllers/       # API Endpoints
-│   │   ├── Services/          # Lógica de negócio
-│   │   ├── Repositories/      # Acesso a dados
-│   │   ├── Models/            # DTOs
-│   │   └── Database/
-│   │       ├── Entities/      # Entidades EF Core
-│   │       └── EntityTypeConfiguration/
-│   ├── Category/              # Gerenciamento de categorias
-│   ├── Question/              # Gerenciamento de perguntas
-│   └── Trivia/
-│       └── Models/            # Models compartilhados
-├── Infrastructure/
-│   └── Logging/               # Compile-time logging
-├── Migrations/                # EF Core migrations
-└── Program.cs                 # Configuração da aplicação
+├── Capabilities/                  # Cada feature e uma capability isolada
+│   ├── User/                      # Autenticacao, CRUD de usuarios, roles
+│   ├── Category/                  # Categorias de perguntas
+│   ├── Question/                  # Perguntas do trivia
+│   ├── AnswerOptions/             # Alternativas de resposta
+│   ├── Match/                     # Sessoes de jogo e gameplay
+│   ├── PlayerAnswer/              # Respostas dos jogadores
+│   └── Shared/                    # Base classes compartilhadas
+├── Infrastructure/                # Concerns transversais
+│   ├── Authentication/            # Custom auth handlers (API Key)
+│   ├── Filters/                   # Global validation filter
+│   ├── Logging/                   # Compile-time structured logging
+│   └── Swagger/                   # JWT Bearer config no Swagger
+├── Migrations/                    # EF Core migrations + DbContext
+└── Program.cs                     # Composicao da aplicacao
 ```
 
-### Padrão de camadas
+### Estrutura interna de cada Capability
 
 ```
-Controller → Service → Repository → Database
-     ↓          ↓           ↓
-   DTOs    Business Logic  EF Core
+Capability/
+├── Controllers/                   # Endpoints HTTP (entrada)
+├── Services/                      # Logica de negocio
+│   └── Interfaces/
+├── Repositories/                  # Acesso a dados (EF Core)
+│   └── Interfaces/
+├── Database/
+│   ├── Entities/                  # Modelos EF Core (herdam BaseEntity)
+│   └── EntityTypeConfiguration/   # Fluent API config
+├── Models/                        # DTOs (Request/Response)
+├── Validators/                    # FluentValidation rules
+├── Extensions/                    # Entity <-> DTO mapping
+└── Enums/                         # Enumeracoes do dominio
 ```
 
-## 🗄️ Banco de Dados
+### Fluxo de uma request
 
-Para informações detalhadas sobre o esquema do banco de dados, incluindo todas as tabelas planejadas e implementadas, consulte:
+```
+HTTP Request
+    │
+    ▼
+Controller          Recebe request, chama service, retorna ApiResponse<T>
+    │
+    ▼
+Service             Logica de negocio, validacoes, orquestracao
+    │
+    ▼
+Repository          Acesso a dados via EF Core (herda BaseRepository<T>)
+    │
+    ▼
+PostgreSQL          Persistencia
+```
 
-📖 **[DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md)** - Documentação completa do esquema
+### Padroes utilizados
 
-### Status Atual
+| Padrao | Onde | Motivo |
+|--------|------|--------|
+| **Repository Pattern** | `BaseRepository<T>` + interfaces | Abstrai acesso a dados, facilita testes |
+| **DTO Pattern** | `Models/` em cada capability | Separacao estrita entre entidades e contratos de API |
+| **Extension Methods** | `Extensions/` mapping | Conversao Entity <-> DTO sem poluir as classes |
+| **Envelope Pattern** | `ApiResponse<T>` | Resposta padronizada em toda a API |
+| **Strategy Pattern** | Authentication Schemes | JWT Bearer + API Key como esquemas intercambiaveis |
+| **Validator Pattern** | FluentValidation + Global Filter | Validacao declarativa, desacoplada dos controllers |
 
-| Tabela | Status | Descrição |
+## Autenticacao e Autorizacao
+
+O sistema possui **dois esquemas de autenticacao**:
+
+### JWT Bearer (default)
+Login com email/password gera um token JWT com claims de role. Usado por usuarios finais.
+
+### API Key (AuthKey scheme)
+Header `X-Api-Key` para acesso administrativo sem login. Usado para integracao e operacoes de servico.
+
+### Roles
+
+| Role | Valor | Permissoes |
+|------|-------|------------|
+| Admin | 1 | CRUD de categorias, perguntas, answer options, gerenciar matches e usuarios |
+| Player | 2 | Jogar matches, gerenciar proprio perfil |
+
+### Como os schemes sao usados nos endpoints
+
+```csharp
+[Authorize]                                          // JWT - qualquer user logado
+[Authorize(Roles = "Admin")]                         // JWT - so admin
+[Authorize(AuthenticationSchemes = "AuthKey")]        // API Key apenas
+[Authorize(AuthenticationSchemes = "Bearer,AuthKey", Roles = "Admin")]  // JWT ou API Key, admin
+```
+
+## API Endpoints
+
+### Autenticacao (Publico)
+
+```http
+POST /api/user/register     # Registrar novo usuario (role Player por padrao)
+POST /api/user/login        # Login, retorna JWT com role
+```
+
+### Usuario (Requer autenticacao)
+
+```http
+GET    /api/user/me                  # Perfil do usuario autenticado
+GET    /api/user/{id}                # Buscar por ID
+GET    /api/user?page=1&pageSize=10  # Listar (paginado)
+PUT    /api/user/{id}                # Atualizar perfil (proprio ou admin)
+DELETE /api/user/{id}                # Deletar (proprio ou admin)
+POST   /api/user/{id}/change-password # Alterar senha
+PUT    /api/user/{id}/role           # Alterar role (Admin ou API Key)
+```
+
+### Categorias
+
+```http
+GET    /api/category          # Listar todas (publico)
+GET    /api/category/{id}     # Buscar por ID (publico)
+POST   /api/category          # Criar (Admin)
+PUT    /api/category/{id}     # Atualizar (Admin)
+DELETE /api/category/{id}     # Deletar (Admin)
+```
+
+### Perguntas
+
+```http
+GET    /api/question                                           # Listar todas (publico)
+GET    /api/question/{id}                                      # Buscar por ID (publico)
+GET    /api/question/category/{categoryId}                     # Por categoria (publico)
+GET    /api/question/category/{categoryId}/difficulty/{level}  # Por categoria e dificuldade (publico)
+POST   /api/question                                           # Criar (Admin)
+PUT    /api/question/{id}                                      # Atualizar (Admin)
+DELETE /api/question/{id}                                      # Deletar (Admin)
+```
+
+### Answer Options
+
+```http
+GET    /api/answeroption                        # Listar todas (publico)
+GET    /api/answeroption/{id}                   # Buscar por ID (publico)
+GET    /api/answeroption/question/{questionId}  # Por pergunta (publico)
+POST   /api/answeroption                        # Criar (Admin)
+PUT    /api/answeroption/{id}                   # Atualizar (Admin)
+DELETE /api/answeroption/{id}                   # Deletar (Admin)
+```
+
+### Match (Gameplay)
+
+```http
+POST   /api/match                    # Criar match Pending (autenticado)
+GET    /api/match                    # Listar matches (publico)
+GET    /api/match/{id}               # Buscar por ID (publico)
+PUT    /api/match/{id}               # Atualizar (Admin)
+DELETE /api/match/{id}               # Deletar (Admin)
+POST   /api/match/{id}/start         # Iniciar match (autenticado)
+GET    /api/match/{id}/next-question  # Proxima pergunta (autenticado)
+POST   /api/match/{id}/answer        # Responder pergunta (autenticado)
+GET    /api/match/{id}/results        # Resultados finais (autenticado)
+```
+
+### Fluxo de jogo
+
+```
+1. POST /api/match  { "status": 1, "selectedCategoryId": 1 }   → Cria match Pending
+2. POST /api/match/{id}/start                                    → Seleciona 10 perguntas, status InProgress
+3. GET  /api/match/{id}/next-question                            → Retorna pergunta + opcoes embaralhadas
+4. POST /api/match/{id}/answer  { questionId, selectedAnswerOptionId }  → Feedback imediato (correto/incorreto)
+5. Repete 3-4 ate isLastQuestion: true
+6. GET  /api/match/{id}/results                                  → Score final e breakdown
+```
+
+## Banco de Dados
+
+| Tabela | Status | Descricao |
 |--------|--------|-----------|
-| Users | ✅ Implementado | Gerenciamento de usuários e autenticação |
-| Categories | ✅ Implementado | Categorias de perguntas (C#, JavaScript, etc) |
-| Questions | ✅ Implementado | Perguntas do trivia |
-| **AnswerOptions** | ❌ **PLANEJADO** | **Alternativas e resposta correta** |
-| Matches | ❌ Planejado | Sessões de jogo |
-| PlayerAnswers | ❌ Planejado | Registro de respostas |
-| PlayerStats | ❌ Planejado | Estatísticas e ranking |
-| AuthSessions | ❌ Planejado | Refresh tokens |
+| Users | Implementado | Usuarios, autenticacao, roles (Admin/Player) |
+| Categories | Implementado | Categorias de perguntas |
+| Questions | Implementado | Perguntas com dificuldade e categoria |
+| AnswerOptions | Implementado | Alternativas com marcacao de correta |
+| Matches | Implementado | Sessoes de jogo com estado (Pending/InProgress/Finished) |
+| PlayerAnswers | Implementado | Respostas dos jogadores por match |
 
-> ⚠️ **Nota**: Atualmente o sistema não possui tabela de alternativas (AnswerOptions), que é crítica para o funcionamento do jogo. Veja DATABASE_SCHEMA.md para detalhes.
+### Shared base
 
-## 🔐 Segurança
+Todas as entidades herdam `BaseEntity` que fornece:
+- `Id` (long, auto-increment)
+- `CreatedAt` (nullable, default `NOW()`)
+- `UpdatedAt` (nullable, default `NOW()`)
 
-- ✅ Senhas hashadas com BCrypt (work factor 12)
-- ✅ JWT com assinatura HS256
-- ✅ Validação de senha forte (mínimo 8 caracteres, maiúscula, minúscula, número, caractere especial)
-- ✅ Email único por usuário
-- ✅ Usuários só podem modificar seus próprios dados
-- ✅ CORS configurado
+## Seguranca
 
-## 📊 Event IDs de Logging
+- Senhas hashadas com BCrypt (work factor 12)
+- JWT com assinatura HS256, clock skew desabilitado
+- Validacao de senha forte (8+ chars, maiuscula, minuscula, numero, especial)
+- Email unico por usuario
+- Ownership check (usuarios so modificam proprios dados, admin pode tudo)
+- API Key scheme para acesso administrativo externo
+- CORS configurado
+- `appsettings*.json` no `.gitignore`
 
-Os logs seguem um padrão de Event IDs por categoria:
+## Logging
 
-| Range | Categoria | Exemplos |
-|-------|-----------|----------|
-| 1000-1999 | Authentication | Login (1001), Login Success (1002), Login Failed (1003) |
-| 2000-2999 | CRUD Operations | Fetch User (2001), Update User (2003) |
-| 3000-3999 | JWT Operations | Generate Token (3001), Token Failed (3002) |
-| 4000-4999 | Database | DB Error (4001), DB Success (4002) |
-| 5000-5999 | Validation | Validation Failed (5001) |
+Logs estruturados com compile-time source generators (`LoggerMessage`).
 
-### Exemplos de filtros de log:
+| Range | Categoria |
+|-------|-----------|
+| 1000-1999 | Authentication (login, register, token) |
+| 2000-2999 | User CRUD |
+| 3000-3999 | JWT Operations |
+| 4000-4999 | Database errors |
+| 5000-5999 | Validation |
 
-```bash
-# Ver todos os logins
-grep "EventId: 1001" logs.txt
-
-# Ver falhas de autenticação
-grep "EventId: 1003" logs.txt
-
-# Contar operações de DB
-grep "EventId: 400" logs.txt | wc -l
-```
-
-## 🧪 Testes
+## Docker
 
 ```bash
-cd DevTrivia.Tests
-dotnet test
-```
-
-## 🐳 Docker
-
-### Build
-```bash
+# Build
 docker build -t devtrivia-api .
+
+# Docker Compose (API + PostgreSQL)
+docker-compose -f compose.yaml up
 ```
 
-### Run
+## Testes
+
 ```bash
-docker run -p 5000:8080 \
-  -e ConnectionStrings__DefaultConnection="<connection-string>" \
-  -e JwtSettings__SecretKey="<jwt-secret>" \
-  devtrivia-api
+cd DevTrivia.Tests && dotnet test
 ```
 
-### Docker Compose
+## Migrations
+
 ```bash
-docker-compose up
+# Criar
+dotnet ef migrations add <NomeDaMigracao> --project DevTrivia.API
+
+# Aplicar
+dotnet ef database update --project DevTrivia.API
+
+# Reverter
+dotnet ef database update <MigracaoAnterior> --project DevTrivia.API
 ```
 
-## 📝 Migrations
-
-### Criar nova migration
-```bash
-dotnet ef migrations add <NomeDaMigracao>
-```
-
-### Aplicar migrations
-```bash
-dotnet ef database update
-```
-
-### Reverter migration
-```bash
-dotnet ef database update <MigracaoAnterior>
-```
-
-### Remover última migration
-```bash
-dotnet ef migrations remove
-```
-
-## 🌍 Variáveis de Ambiente (Produção)
-
-Configure no Azure App Service ou Key Vault:
+## Variaveis de Ambiente (Producao)
 
 ```
 ConnectionStrings__DefaultConnection
@@ -312,33 +327,10 @@ JwtSettings__SecretKey
 JwtSettings__Issuer
 JwtSettings__Audience
 JwtSettings__ExpirationInMinutes
+ApiKeySettings__Keys__0
 KeyVault__Vault
 ```
 
-## 📦 Pacotes Principais
-
-```xml
-<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
-<PackageReference Include="jose-jwt" Version="5.2.0" />
-<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
-<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1" />
-<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.1" />
-<PackageReference Include="Azure.Identity" Version="1.17.1" />
-<PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0" />
-```
-
-## 📄 Licença
+## Licenca
 
 MIT
-
-## 🤝 Contribuindo
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
-4. Push para a branch (`git push origin feature/MinhaFeature`)
-5. Abra um Pull Request
-
-## 👥 Autores
-
-- Seu Nome - [GitHub](https://github.com/seu-usuario)

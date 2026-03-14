@@ -1,10 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using DevTrivia.API.Capabilities.Shared.Models;
+using DevTrivia.API.Capabilities.User.Enums;
 
 namespace DevTrivia.API.Capabilities.User.Database.Entities;
 
 public sealed class UserEntity : BaseEntity
 {
+    public RoleEnum Role { get; set; } = RoleEnum.Player;
+
     public required string Name { get; set; } = string.Empty;
 
     [EmailAddress]

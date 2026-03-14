@@ -22,6 +22,10 @@ public class UserConf : IEntityTypeConfiguration<UserEntity>
         builder.Property(x => x.PasswordHash)
             .HasMaxLength(255);
 
+        builder.Property(x => x.Role)
+            .IsRequired()
+            .HasDefaultValue(Enums.RoleEnum.Player);
+
         builder.Property(x => x.AuthProvider)
             .IsRequired()
             .HasMaxLength(50)

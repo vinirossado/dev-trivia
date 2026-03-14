@@ -14,7 +14,9 @@ using DevTrivia.API.Capabilities.User.Repositories;
 using DevTrivia.API.Capabilities.User.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.User.Services;
 using DevTrivia.API.Capabilities.User.Services.Interfaces;
+using DevTrivia.API.Infrastructure.Authentication;
 using DevTrivia.API.Infrastructure.Swagger;
+using Microsoft.AspNetCore.Authentication;
 using DevTrivia.API.Migrations;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -199,7 +201,8 @@ builder.Services.AddAuthentication(options =>
             return Task.CompletedTask;
         }
     };
-});
+})
+.AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>("AuthKey", null);
 
 builder.Services.AddMemoryCache();
 

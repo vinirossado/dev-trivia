@@ -1,4 +1,5 @@
 using DevTrivia.API.Capabilities.Shared.Models;
+using DevTrivia.API.Capabilities.User.Enums;
 using DevTrivia.API.Capabilities.User.Models;
 using DevTrivia.API.Capabilities.User.Services.Interfaces;
 using DevTrivia.API.Infrastructure.Logging;
@@ -137,9 +138,9 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Update(long id, [FromBody] UpdateUserRequest request, CancellationToken cancellationToken)
     {
-        // Check if user is updating their own profile or is admin
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userIdClaim != id.ToString())
+        var isAdmin = User.IsInRole("Admin");
+        if (userIdClaim != id.ToString() && !isAdmin)
         {
             return Forbid();
         }
@@ -170,9 +171,9 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
     {
-        // Check if user is deleting their own account or is admin
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userIdClaim != id.ToString())
+        var isAdmin = User.IsInRole("Admin");
+        if (userIdClaim != id.ToString() && !isAdmin)
         {
             return Forbid();
         }
@@ -263,6 +264,31 @@ public class UserController : ControllerBase
         {
             _logger.DatabaseError("get current user", ex.Message, ex);
             return StatusCode(500, new ApiResponse<object>(false, null, "An error occurred while retrieving user profile"));
+        }
+    }
+
+    /// <summary>
+    /// Change a user's role (Admin only, or via API Key)
+    /// </summary>
+    [HttpPut("{id}/role")]
+    [Authorize(AuthenticationSchemes = "Bearer,AuthKey", Roles = "Admin")]
+    [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ChangeRole(long id, [FromBody] ChangeRoleRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var user = await _userService.ChangeRoleAsync(id, request.Role, cancellationToken);
+            return Ok(new ApiResponse<UserDto>(true, user, $"User role changed to {request.Role}"));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ApiResponse<object>(false, null, ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.DatabaseError("change user role", ex.Message, ex);
+            return StatusCode(500, new ApiResponse<object>(false, null, "An error occurred while changing user role"));
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Text;
 using DevTrivia.API.Capabilities.User.Database.Entities;
+using DevTrivia.API.Capabilities.User.Enums;
 using DevTrivia.API.Capabilities.User.Models;
 using DevTrivia.API.Capabilities.User.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.User.Services.Interfaces;
@@ -55,6 +56,7 @@ public sealed class UserService : IUserService
             UserId = user.Id,
             Email = user.Email,
             Name = user.Name,
+            Role = user.Role,
             ExpiresAt = _timeProvider.GetUtcNow().UtcDateTime.AddMinutes(expirationMinutes)
         };
     }
@@ -185,6 +187,22 @@ public sealed class UserService : IUserService
         return true;
     }
 
+    public async Task<UserDto> ChangeRoleAsync(long id, RoleEnum role, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+
+        if (user is null)
+        {
+            _logger.UserNotFound(id);
+            throw new KeyNotFoundException($"User with ID {id} not found");
+        }
+
+        user.Role = role;
+        await _userRepository.UpdateAsync(user, cancellationToken);
+
+        return MapToDto(user);
+    }
+
     private string GenerateJwtToken(UserEntity user)
     {
         try
@@ -215,9 +233,13 @@ public sealed class UserService : IUserService
                 { "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name", user.Name },
                 { "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", user.Email },
                 
+                // Role claim (for [Authorize(Roles = "Admin")])
+                { "http://schemas.microsoft.com/ws/2008/06/identity/claims/role", user.Role.ToString() },
+
                 // Custom claims (optional)
                 { "email", user.Email },
-                { "name", user.Name }
+                { "name", user.Name },
+                { "role", user.Role.ToString() }
             };
 
             var keyBytes = Encoding.UTF8.GetBytes(secretKey);
@@ -256,6 +278,7 @@ public sealed class UserService : IUserService
             Id = user.Id,
             Name = user.Name,
             Email = user.Email,
+            Role = user.Role,
             ProfileImageUrl = user.ProfileImageUrl,
             Bio = user.Bio,
             Location = user.Location,

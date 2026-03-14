@@ -1,3 +1,4 @@
+using DevTrivia.API.Capabilities.User.Enums;
 using DevTrivia.API.Capabilities.User.Models;
 
 namespace DevTrivia.API.Capabilities.User.Services.Interfaces;
@@ -11,4 +12,5 @@ public interface IUserService
     Task<UserDto> UpdateAsync(long id, UpdateUserRequest request, CancellationToken cancellationToken = default);
     Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default);
     Task<bool> ChangePasswordAsync(long id, ChangePasswordRequest request, CancellationToken cancellationToken = default);
+    Task<UserDto> ChangeRoleAsync(long id, RoleEnum role, CancellationToken cancellationToken = default);
 }

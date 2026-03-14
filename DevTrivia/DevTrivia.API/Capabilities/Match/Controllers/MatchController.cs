@@ -63,7 +63,7 @@ public class MatchController : ControllerBase
     /// <summary>
     /// Update an existing match
     /// </summary>
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     [ProducesResponseType(typeof(ApiResponse<MatchResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
@@ -95,7 +95,7 @@ public class MatchController : ControllerBase
     /// <summary>
     /// Delete a match by ID
     /// </summary>
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
