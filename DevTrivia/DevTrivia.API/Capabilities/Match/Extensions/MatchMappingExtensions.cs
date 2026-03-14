@@ -10,8 +10,6 @@ public static class MatchMappingExtensions
         return new MatchResponse
         {
             Id = entity.Id,
-            StartedAt = entity.StartedAt,
-            EndedAt = entity.EndedAt,
             Status = entity.Status,
             SelectedCategoryId = entity.SelectedCategoryId,
             CategoryName = entity.Category?.Name
@@ -22,8 +20,6 @@ public static class MatchMappingExtensions
     {
         return new MatchEntity
         {
-            StartedAt = request.StartedAt,
-            EndedAt = request.EndedAt,
             Status = request.Status,
             SelectedCategoryId = request.SelectedCategoryId
         };

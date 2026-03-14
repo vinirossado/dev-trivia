@@ -27,11 +27,11 @@ public abstract class BaseRepository<TEntity> : IRepository<TEntity> where TEnti
 
     public virtual async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        entity.CreatedAt = DateTime.UtcNow;
-        entity.UpdatedAt = DateTime.UtcNow;
+        entity.CreatedAt ??= DateTime.UtcNow;
+        entity.UpdatedAt ??= DateTime.UtcNow;
         await DbSet.AddAsync(entity, cancellationToken);
         await Context.SaveChangesAsync(cancellationToken);
-        
+
         return entity;
     }
 
@@ -40,7 +40,7 @@ public abstract class BaseRepository<TEntity> : IRepository<TEntity> where TEnti
         entity.UpdatedAt = DateTime.UtcNow;
         DbSet.Update(entity);
         await Context.SaveChangesAsync(cancellationToken);
-        
+
         return entity;
     }
 

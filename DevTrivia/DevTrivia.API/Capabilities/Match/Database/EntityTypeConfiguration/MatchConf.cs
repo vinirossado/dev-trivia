@@ -11,14 +11,6 @@ public class MatchConf : IEntityTypeConfiguration<MatchEntity>
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).IsRequired();
 
-        builder.Property(x => x.StartedAt)
-            .IsRequired()
-            .HasColumnType("timestamp with time zone");
-
-        builder.Property(x => x.EndedAt)
-            .IsRequired()
-            .HasColumnType("timestamp with time zone");
-
         builder.Property(x => x.Status)
             .IsRequired()
             .HasMaxLength(20);

@@ -1,29 +1,31 @@
-using System.Collections.Concurrent;
 using DevTrivia.API.Capabilities.AnswerOptions.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Match.Enums;
 using DevTrivia.API.Capabilities.Match.Models;
 using DevTrivia.API.Capabilities.Match.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Match.Services.Interfaces;
+using DevTrivia.API.Capabilities.PlayerAnswer.Database.Entities;
+using DevTrivia.API.Capabilities.PlayerAnswer.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Question.Repositories.Interfaces;
 
 namespace DevTrivia.API.Capabilities.Match.Services;
 
 public sealed class GamePlayService : IGamePlayService
 {
-    private static readonly ConcurrentDictionary<long, GameState> ActiveGames = new();
-
     private readonly IMatchRepository _matchRepository;
     private readonly IQuestionRepository _questionRepository;
     private readonly IAnswerOptionRepository _answerOptionRepository;
+    private readonly IPlayerAnswerRepository _playerAnswerRepository;
 
     public GamePlayService(
         IMatchRepository matchRepository,
         IQuestionRepository questionRepository,
-        IAnswerOptionRepository answerOptionRepository)
+        IAnswerOptionRepository answerOptionRepository,
+        IPlayerAnswerRepository playerAnswerRepository)
     {
         _matchRepository = matchRepository;
         _questionRepository = questionRepository;
         _answerOptionRepository = answerOptionRepository;
+        _playerAnswerRepository = playerAnswerRepository;
     }
 
     public async Task<GameStartResponse> StartMatchAsync(long matchId, CancellationToken ct = default)
@@ -34,28 +36,27 @@ public sealed class GamePlayService : IGamePlayService
         if (match.Status != StatusEnum.Pending)
             throw new InvalidOperationException("Match must be in Pending status to start");
 
-        var questions = await _questionRepository.GetByCategoryIdAsync(match.SelectedCategoryId, ct);
-        var selectedQuestions = questions
-            .OrderBy(_ => Random.Shared.Next())
-            .Take(10)
-            .ToList();
+        var questions = (await _questionRepository.GetByCategoryIdAsync(match.SelectedCategoryId, ct)).ToList();
 
-        if (selectedQuestions.Count == 0)
+        if (questions.Count == 0)
             throw new InvalidOperationException("No questions available for the selected category");
 
-        var gameState = new GameState
-        {
-            Questions = selectedQuestions.Select(q => new QuestionState
-            {
-                QuestionId = q.Id,
-                Title = q.Title
-            }).ToList()
-        };
+        Random.Shared.Shuffle(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(questions));
+        var selectedQuestions = questions.Take(10).ToList();
 
-        ActiveGames[matchId] = gameState;
+        foreach (var question in selectedQuestions)
+        {
+            await _playerAnswerRepository.AddAsync(new PlayerAnswerEntity
+            {
+                MatchId = matchId,
+                QuestionId = question.Id,
+                IsCorrect = false,
+                AnsweredAt = default
+            }, ct);
+        }
 
         match.Status = StatusEnum.InProgress;
-        match.StartedAt = DateTime.UtcNow;
+        match.CreatedAt = DateTime.UtcNow;
         await _matchRepository.UpdateAsync(match, ct);
 
         return new GameStartResponse
@@ -75,29 +76,28 @@ public sealed class GamePlayService : IGamePlayService
         if (match.Status != StatusEnum.InProgress)
             throw new InvalidOperationException("Match must be in InProgress status");
 
-        if (!ActiveGames.TryGetValue(matchId, out var gameState))
-            throw new InvalidOperationException("Game state not found. The match may need to be restarted");
-
-        var nextQuestion = gameState.Questions.FirstOrDefault(q => !q.IsAnswered)
+        var nextPlayerAnswer = await _playerAnswerRepository.GetUnansweredByMatchIdAsync(matchId, ct)
             ?? throw new InvalidOperationException("All questions have been answered");
 
-        var answeredCount = gameState.Questions.Count(q => q.IsAnswered);
+        var allPlayerAnswers = await _playerAnswerRepository.GetByMatchIdAsync(matchId, ct);
+        var playerAnswerList = allPlayerAnswers.ToList();
+        var answeredCount = playerAnswerList.Count(pa => pa.AnsweredAt != default);
 
-        var answerOptions = await _answerOptionRepository.GetAnswerOptionsByQuestionId(nextQuestion.QuestionId, ct);
-        var shuffledOptions = answerOptions
-            .OrderBy(_ => Random.Shared.Next())
-            .Select(ao => new GameAnswerOption
-            {
-                Id = ao.Id,
-                Text = ao.Text
-            });
+        var answerOptions = (await _answerOptionRepository.GetAnswerOptionsByQuestionId(nextPlayerAnswer.QuestionId, ct)).ToList();
+        Random.Shared.Shuffle(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(answerOptions));
+
+        var shuffledOptions = answerOptions.Select(ao => new GameAnswerOption
+        {
+            Id = ao.Id,
+            Text = ao.Text
+        });
 
         return new GameQuestionResponse
         {
-            QuestionId = nextQuestion.QuestionId,
-            Title = nextQuestion.Title,
+            QuestionId = nextPlayerAnswer.QuestionId,
+            Title = nextPlayerAnswer.Question.Title,
             QuestionNumber = answeredCount + 1,
-            TotalQuestions = gameState.Questions.Count,
+            TotalQuestions = playerAnswerList.Count,
             Options = shuffledOptions
         };
     }
@@ -110,32 +110,39 @@ public sealed class GamePlayService : IGamePlayService
         if (match.Status != StatusEnum.InProgress)
             throw new InvalidOperationException("Match must be in InProgress status");
 
-        if (!ActiveGames.TryGetValue(matchId, out var gameState))
-            throw new InvalidOperationException("Game state not found. The match may need to be restarted");
-
-        var questionState = gameState.Questions.FirstOrDefault(q => q.QuestionId == request.QuestionId)
+        var playerAnswer = await _playerAnswerRepository.GetByMatchAndQuestionAsync(matchId, request.QuestionId, ct)
             ?? throw new KeyNotFoundException($"Question {request.QuestionId} is not part of this match");
 
-        if (questionState.IsAnswered)
+        if (playerAnswer.AnsweredAt != default)
             throw new InvalidOperationException("This question has already been answered");
 
         var answerOptions = await _answerOptionRepository.GetAnswerOptionsByQuestionId(request.QuestionId, ct);
-        var correctOption = answerOptions.FirstOrDefault(ao => ao.IsCorrect)
+        var answerOptionList = answerOptions.ToList();
+        var correctOption = answerOptionList.FirstOrDefault(ao => ao.IsCorrect)
             ?? throw new InvalidOperationException("No correct answer configured for this question");
+
+        if (request.SelectedAnswerOptionId.HasValue
+            && answerOptionList.All(ao => ao.Id != request.SelectedAnswerOptionId.Value))
+        {
+            throw new KeyNotFoundException(
+                $"Answer option {request.SelectedAnswerOptionId} does not belong to question {request.QuestionId}");
+        }
 
         var isCorrect = request.SelectedAnswerOptionId.HasValue
             && request.SelectedAnswerOptionId.Value == correctOption.Id;
 
-        questionState.SelectedAnswerOptionId = request.SelectedAnswerOptionId;
-        questionState.IsCorrect = isCorrect;
-        questionState.IsAnswered = true;
+        playerAnswer.SelectedAnswerOptionId = request.SelectedAnswerOptionId;
+        playerAnswer.IsCorrect = isCorrect;
+        playerAnswer.AnsweredAt = DateTime.UtcNow;
+        await _playerAnswerRepository.UpdateAsync(playerAnswer, ct);
 
-        var isLastQuestion = gameState.Questions.All(q => q.IsAnswered);
+        var unanswered = await _playerAnswerRepository.GetUnansweredByMatchIdAsync(matchId, ct);
+        var isLastQuestion = unanswered is null;
 
         if (isLastQuestion)
         {
             match.Status = StatusEnum.Finished;
-            match.EndedAt = DateTime.UtcNow;
+            match.CreatedAt = DateTime.UtcNow;
             await _matchRepository.UpdateAsync(match, ct);
         }
 
@@ -147,44 +154,41 @@ public sealed class GamePlayService : IGamePlayService
         };
     }
 
-    public Task<GameResultsResponse> GetResultsAsync(long matchId, CancellationToken ct = default)
+    public async Task<GameResultsResponse> GetResultsAsync(long matchId, CancellationToken ct = default)
     {
-        if (!ActiveGames.TryGetValue(matchId, out var gameState))
-            throw new KeyNotFoundException($"Results not found for match {matchId}");
+        var match = await _matchRepository.GetByIdAsync(matchId, ct)
+            ?? throw new KeyNotFoundException($"Match with ID {matchId} not found");
 
-        var totalQuestions = gameState.Questions.Count;
-        var correctAnswers = gameState.Questions.Count(q => q.IsCorrect);
+        if (match.Status != StatusEnum.Finished)
+            throw new InvalidOperationException("Match must be in Finished status to view results");
 
-        var response = new GameResultsResponse
+        var playerAnswers = (await _playerAnswerRepository.GetByMatchIdAsync(matchId, ct)).ToList();
+        var totalQuestions = playerAnswers.Count;
+        var correctAnswers = playerAnswers.Count(pa => pa.IsCorrect);
+
+        var correctOptionsByQuestion = new Dictionary<long, long>();
+        foreach (var pa in playerAnswers)
+        {
+            var options = await _answerOptionRepository.GetAnswerOptionsByQuestionId(pa.QuestionId, ct);
+            var correct = options.FirstOrDefault(ao => ao.IsCorrect);
+            if (correct is not null)
+                correctOptionsByQuestion[pa.QuestionId] = correct.Id;
+        }
+
+        return new GameResultsResponse
         {
             MatchId = matchId,
             TotalQuestions = totalQuestions,
             CorrectAnswers = correctAnswers,
             Score = totalQuestions > 0 ? (correctAnswers * 100) / totalQuestions : 0,
-            Questions = gameState.Questions.Select(q => new QuestionResult
+            Questions = playerAnswers.Select(pa => new QuestionResult
             {
-                QuestionId = q.QuestionId,
-                Title = q.Title,
-                SelectedAnswerOptionId = q.SelectedAnswerOptionId,
-                CorrectAnswerOptionId = 0, // Will be populated below
-                IsCorrect = q.IsCorrect
+                QuestionId = pa.QuestionId,
+                Title = pa.Question.Title,
+                SelectedAnswerOptionId = pa.SelectedAnswerOptionId,
+                CorrectAnswerOptionId = correctOptionsByQuestion.GetValueOrDefault(pa.QuestionId),
+                IsCorrect = pa.IsCorrect
             })
         };
-
-        return Task.FromResult(response);
-    }
-
-    private sealed class GameState
-    {
-        public List<QuestionState> Questions { get; init; } = [];
-    }
-
-    private sealed class QuestionState
-    {
-        public long QuestionId { get; init; }
-        public string Title { get; init; } = null!;
-        public long? SelectedAnswerOptionId { get; set; }
-        public bool IsCorrect { get; set; }
-        public bool IsAnswered { get; set; }
     }
 }

@@ -262,7 +262,7 @@ public sealed class UserService : IUserService
             DateOfBirth = user.DateOfBirth,
             LastLoginAt = user.LastLoginAt,
             PreferredLanguage = user.PreferredLanguage,
-            CreatedAt = user.CreatedAt,
+            CreatedAt = user.CreatedAt.GetValueOrDefault(),
             UpdatedAt = user.UpdatedAt
         };
     }

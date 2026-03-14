@@ -1,4 +1,3 @@
-using DevTrivia.API.Capabilities.Match.Enums;
 using DevTrivia.API.Capabilities.Match.Models;
 using FluentValidation;
 
@@ -13,12 +12,5 @@ public class MatchRequestValidator : AbstractValidator<MatchRequest>
 
         RuleFor(x => x.SelectedCategoryId)
             .GreaterThan(0).WithMessage("SelectedCategoryId must be greater than 0");
-
-        RuleFor(x => x.StartedAt)
-            .NotEmpty().WithMessage("StartedAt is required");
-
-        RuleFor(x => x.EndedAt)
-            .NotEmpty().WithMessage("EndedAt is required")
-            .GreaterThanOrEqualTo(x => x.StartedAt).WithMessage("EndedAt must be after StartedAt");
     }
 }

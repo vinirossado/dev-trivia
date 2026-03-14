@@ -4,6 +4,8 @@ using DevTrivia.API.Capabilities.Category.Database.Entities;
 using DevTrivia.API.Capabilities.Category.Database.EntityTypeConfiguration;
 using DevTrivia.API.Capabilities.Match.Database.Entities;
 using DevTrivia.API.Capabilities.Match.Database.EntityTypeConfiguration;
+using DevTrivia.API.Capabilities.PlayerAnswer.Database.Entities;
+using DevTrivia.API.Capabilities.PlayerAnswer.Database.EntityTypeConfiguration;
 using DevTrivia.API.Capabilities.Question.Database.Entities;
 using DevTrivia.API.Capabilities.Question.Database.EntityTypeConfiguration;
 using DevTrivia.API.Capabilities.User.Database.Entities;
@@ -19,6 +21,7 @@ public class TriviaDbContext(DbContextOptions<TriviaDbContext> options) : DbCont
     public DbSet<QuestionEntity> Questions { get; set; }
     public DbSet<AnswerOptionEntity> AnswerOptions { get; set; }
     public DbSet<MatchEntity> Matches { get; set; }
+    public DbSet<PlayerAnswerEntity> PlayerAnswers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -39,6 +42,21 @@ public class TriviaDbContext(DbContextOptions<TriviaDbContext> options) : DbCont
             }
         }
 
+        // Configure CreatedAt and UpdatedAt defaults for all BaseEntity types
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (typeof(Capabilities.Shared.Models.BaseEntity).IsAssignableFrom(entityType.ClrType))
+            {
+                modelBuilder.Entity(entityType.ClrType)
+                    .Property(nameof(Capabilities.Shared.Models.BaseEntity.CreatedAt))
+                    .HasDefaultValueSql("NOW()");
+
+                modelBuilder.Entity(entityType.ClrType)
+                    .Property(nameof(Capabilities.Shared.Models.BaseEntity.UpdatedAt))
+                    .HasDefaultValueSql("NOW()");
+            }
+        }
+
         Configure(modelBuilder);
     }
 
@@ -49,5 +67,6 @@ public class TriviaDbContext(DbContextOptions<TriviaDbContext> options) : DbCont
         new QuestionConf().Configure(modelBuilder.Entity<QuestionEntity>());
         new AnswerOptionConf().Configure(modelBuilder.Entity<AnswerOptionEntity>());
         new MatchConf().Configure(modelBuilder.Entity<MatchEntity>());
+        new PlayerAnswerConf().Configure(modelBuilder.Entity<PlayerAnswerEntity>());
     }
 }

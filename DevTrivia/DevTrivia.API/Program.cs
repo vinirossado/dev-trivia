@@ -26,6 +26,8 @@ using DevTrivia.API.Capabilities.Match.Repositories;
 using DevTrivia.API.Capabilities.Match.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Match.Services;
 using DevTrivia.API.Capabilities.Match.Services.Interfaces;
+using DevTrivia.API.Capabilities.PlayerAnswer.Repositories;
+using DevTrivia.API.Capabilities.PlayerAnswer.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Question.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -97,6 +99,7 @@ builder.Services.AddScoped<IAnswerOptionRepository, AnswerOptionRepository>();
 builder.Services.AddScoped<IAnswerOptionService, AnswerOptionService>();
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<IPlayerAnswerRepository, PlayerAnswerRepository>();
 builder.Services.AddScoped<IGamePlayService, GamePlayService>();
 
 // Add FluentValidation

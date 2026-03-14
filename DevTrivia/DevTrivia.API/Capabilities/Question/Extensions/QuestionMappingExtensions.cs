@@ -15,8 +15,8 @@ public static class QuestionMappingExtensions
             Difficulty = entity.Difficulty,
             CategoryId = entity.CategoryId,
             CategoryName = entity.Category?.Name,
-            CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt
+            CreatedAt = entity.CreatedAt.GetValueOrDefault(),
+            UpdatedAt = entity.UpdatedAt.GetValueOrDefault()
         };
     }
 

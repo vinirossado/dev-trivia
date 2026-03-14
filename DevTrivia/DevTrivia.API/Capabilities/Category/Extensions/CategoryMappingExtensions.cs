@@ -12,8 +12,8 @@ public static class CategoryMappingExtensions
             Id = entity.Id,
             Name = entity.Name,
             Description = entity.Description,
-            CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt
+            CreatedAt = entity.CreatedAt.GetValueOrDefault(),
+            UpdatedAt = entity.UpdatedAt.GetValueOrDefault()
         };
     }
 
