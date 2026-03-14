@@ -267,3 +267,4 @@ Thumbs.db
 # Configuration with sensitive data
 connectionstrings.json
 secrets.*.json
+DevTrivia.API/appsettings.json
