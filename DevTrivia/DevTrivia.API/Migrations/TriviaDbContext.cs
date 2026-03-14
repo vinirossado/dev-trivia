@@ -15,6 +15,7 @@ public class TriviaDbContext(DbContextOptions<TriviaDbContext> options) : DbCont
     public DbSet<UserEntity> Users { get; set; }
     public DbSet<CategoryEntity> Categories { get; set; }
     public DbSet<QuestionEntity> Questions { get; set; }
+    public DbSet<AnswerOptionEntity> AnswerOptions { get; set; }
     public DbSet<MatchEntity> Matches { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -44,6 +45,7 @@ public class TriviaDbContext(DbContextOptions<TriviaDbContext> options) : DbCont
         new UserConf().Configure(modelBuilder.Entity<UserEntity>());
         new CategoryConf().Configure(modelBuilder.Entity<CategoryEntity>());
         new QuestionConf().Configure(modelBuilder.Entity<QuestionEntity>());
+        new AnswerOptionConf().Configure(modelBuilder.Entity<AnswerOptionEntity>());
         new MatchConf().Configure(modelBuilder.Entity<MatchEntity>());
     }
 }

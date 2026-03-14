@@ -1,4 +1,8 @@
 using Azure.Identity;
+using DevTrivia.API.Capabilities.AnswerOptions.Repositories;
+using DevTrivia.API.Capabilities.AnswerOptions.Repositories.Interfaces;
+using DevTrivia.API.Capabilities.AnswerOptions.Services;
+using DevTrivia.API.Capabilities.AnswerOptions.Services.Interfaces;
 using DevTrivia.API.Capabilities.Category.Repositories;
 using DevTrivia.API.Capabilities.Category.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Category.Services;
@@ -19,10 +23,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json;
 using DevTrivia.API.Capabilities.Question.Services;
-using DevTrivia.API.Capabilities.Match.Repositories.Interfaces;
-using DevTrivia.API.Capabilities.Match.Repositories;
-using DevTrivia.API.Capabilities.Match.Services.Interfaces;
-using DevTrivia.API.Capabilities.Match.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -89,8 +89,8 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
-builder.Services.AddScoped<IMatchRepository, MatchRepository>();
-builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<IAnswerOptionRepository, AnswerOptionRepository>();
+builder.Services.AddScoped<IAnswerOptionService, AnswerOptionService>();
 
 // Add FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -143,7 +143,8 @@ if (string.IsNullOrWhiteSpace(secretKey))
 
 if (secretKey.Length < 32)
 {
-    logger.LogWarning("JWT SecretKey is too short ({Length} characters). Recommended minimum is 32 characters (256 bits).", secretKey.Length);
+    throw new InvalidOperationException(
+        $"JWT SecretKey is too short ({secretKey.Length} characters). Minimum is 32 characters (256 bits).");
 }
 
 // Add Authentication

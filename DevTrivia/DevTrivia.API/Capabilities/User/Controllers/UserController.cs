@@ -1,10 +1,10 @@
+using DevTrivia.API.Capabilities.Shared.Models;
 using DevTrivia.API.Capabilities.User.Models;
 using DevTrivia.API.Capabilities.User.Services.Interfaces;
 using DevTrivia.API.Infrastructure.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using DevTrivia.API.Capabilities.Shared.Models;
 
 namespace DevTrivia.API.Capabilities.User.Controllers;
 
@@ -29,13 +29,6 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-            _logger.ValidationFailed("Login", string.Join(", ", errors));
-            return BadRequest(new ApiResponse<object>(false, null, "Validation failed", errors));
-        }
-
         try
         {
             var response = await _userService.LoginAsync(request, cancellationToken);
@@ -57,13 +50,6 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-            _logger.ValidationFailed("Register", string.Join(", ", errors));
-            return BadRequest(new ApiResponse<object>(false, null, "Validation failed", errors));
-        }
-
         try
         {
             var user = await _userService.RegisterAsync(request, cancellationToken);
@@ -158,13 +144,6 @@ public class UserController : ControllerBase
             return Forbid();
         }
 
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-            _logger.ValidationFailed("Update User", string.Join(", ", errors));
-            return BadRequest(new ApiResponse<object>(false, null, "Validation failed", errors));
-        }
-
         try
         {
             var user = await _userService.UpdateAsync(id, request, cancellationToken);
@@ -232,13 +211,6 @@ public class UserController : ControllerBase
         if (userIdClaim != id.ToString())
         {
             return Forbid();
-        }
-
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-            _logger.ValidationFailed("Change Password", string.Join(", ", errors));
-            return BadRequest(new ApiResponse<object>(false, null, "Validation failed", errors));
         }
 
         try
