@@ -1,8 +1,9 @@
-﻿﻿using DevTrivia.API.Capabilities.Question.Extensions;
+﻿using DevTrivia.API.Capabilities.Question.Extensions;
 using DevTrivia.API.Capabilities.Question.Models;
 using DevTrivia.API.Capabilities.Question.Services.Interfaces;
 using DevTrivia.API.Capabilities.Shared.Models;
 using DevTrivia.API.Infrastructure.Logging;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using DevTrivia.API.Capabilities.Question.Enums;
@@ -26,6 +27,7 @@ public class QuestionController : ControllerBase
     /// Create a new question
     /// </summary>
     [HttpPost]
+    [Authorize]
     [ProducesResponseType(typeof(ApiResponse<QuestionResponse>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
@@ -65,6 +67,7 @@ public class QuestionController : ControllerBase
     /// Update an existing question
     /// </summary>
     [HttpPut("{id}")]
+    [Authorize]
     [ProducesResponseType(typeof(ApiResponse<QuestionResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
@@ -96,6 +99,7 @@ public class QuestionController : ControllerBase
     /// Delete a question by ID
     /// </summary>
     [HttpDelete("{id}")]
+    [Authorize]
     [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)

@@ -1,4 +1,5 @@
-﻿using DevTrivia.API.Capabilities.Shared.Models;
+﻿using DevTrivia.API.Capabilities.AnswerOptions.Database.Entities;
+using DevTrivia.API.Capabilities.Shared.Models;
 using DevTrivia.API.Capabilities.Category.Database.Entities;
 using DevTrivia.API.Capabilities.Question.Enums;
 
@@ -12,4 +13,6 @@ public sealed class QuestionEntity : BaseEntity
     
     public long CategoryId { get; set; }
     public CategoryEntity Category { get; set; } = null!;
+    
+    public ICollection<AnswerOptionEntity> AnswerOptions { get; set; } = [];
 }

@@ -120,11 +120,7 @@ artifacts/
 .idea_modules/
 
 # User-specific files (sensitive data)
-appsettings.Development.json
-appsettings.Local.json
-appsettings.*.json
-!appsettings.json
-!appsettings.Production.json
+appsettings*.json
 
 # Secrets
 secrets.json
@@ -271,3 +267,4 @@ Thumbs.db
 # Configuration with sensitive data
 connectionstrings.json
 secrets.*.json
+DevTrivia.API/appsettings.json

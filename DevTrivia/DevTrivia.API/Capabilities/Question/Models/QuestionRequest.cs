@@ -1,4 +1,4 @@
-﻿﻿using DevTrivia.API.Capabilities.Question.Enums;
+﻿using DevTrivia.API.Capabilities.Question.Enums;
 
 namespace DevTrivia.API.Capabilities.Question.Models;
 
