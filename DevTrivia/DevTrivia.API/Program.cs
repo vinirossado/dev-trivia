@@ -7,8 +7,15 @@ using DevTrivia.API.Capabilities.Category.Repositories;
 using DevTrivia.API.Capabilities.Category.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Category.Services;
 using DevTrivia.API.Capabilities.Category.Services.Interfaces;
+using DevTrivia.API.Capabilities.Match.Repositories;
+using DevTrivia.API.Capabilities.Match.Repositories.Interfaces;
+using DevTrivia.API.Capabilities.Match.Services;
+using DevTrivia.API.Capabilities.Match.Services.Interfaces;
+using DevTrivia.API.Capabilities.PlayerAnswer.Repositories;
+using DevTrivia.API.Capabilities.PlayerAnswer.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Question.Repositories;
 using DevTrivia.API.Capabilities.Question.Repositories.Interfaces;
+using DevTrivia.API.Capabilities.Question.Services;
 using DevTrivia.API.Capabilities.Question.Services.Interfaces;
 using DevTrivia.API.Capabilities.User.Repositories;
 using DevTrivia.API.Capabilities.User.Repositories.Interfaces;
@@ -16,21 +23,14 @@ using DevTrivia.API.Capabilities.User.Services;
 using DevTrivia.API.Capabilities.User.Services.Interfaces;
 using DevTrivia.API.Infrastructure.Authentication;
 using DevTrivia.API.Infrastructure.Swagger;
-using Microsoft.AspNetCore.Authentication;
 using DevTrivia.API.Migrations;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json;
-using DevTrivia.API.Capabilities.Match.Repositories;
-using DevTrivia.API.Capabilities.Match.Repositories.Interfaces;
-using DevTrivia.API.Capabilities.Match.Services;
-using DevTrivia.API.Capabilities.Match.Services.Interfaces;
-using DevTrivia.API.Capabilities.PlayerAnswer.Repositories;
-using DevTrivia.API.Capabilities.PlayerAnswer.Repositories.Interfaces;
-using DevTrivia.API.Capabilities.Question.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -111,7 +111,6 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-
 builder.Services.AddControllers(options =>
     {
         // Add global validation filter
@@ -187,11 +186,12 @@ builder.Services.AddAuthentication(options =>
             {
                 logger.LogError("Authentication failed: {Error}", context.Exception.Message);
             }
+
             return Task.CompletedTask;
         },
         OnTokenValidated = context =>
         {
-            logger.LogInformation("Token validated successfully for user: {User}", 
+            logger.LogInformation("Token validated successfully for user: {User}",
                 context.Principal?.Identity?.Name ?? "Unknown");
             return Task.CompletedTask;
         },

@@ -37,7 +37,10 @@ public class ValidationFilter : IAsyncActionFilter
         // Run FluentValidation for each action parameter
         foreach (var argument in context.ActionArguments.Values)
         {
-            if (argument == null) continue;
+            if (argument == null)
+            {
+                continue;
+            }
 
             var argumentType = argument.GetType();
             var validatorType = typeof(IValidator<>).MakeGenericType(argumentType);

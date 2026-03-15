@@ -1,7 +1,8 @@
-using System.Security.Claims;
-using System.Text.Encodings.Web;
+using DevTrivia.API.Capabilities.User.Enums;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
 
 namespace DevTrivia.API.Infrastructure.Authentication;
 
@@ -22,23 +23,29 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<AuthenticationS
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         if (!Request.Headers.TryGetValue(ApiKeyHeaderName, out var apiKeyHeaderValues))
+        {
             return Task.FromResult(AuthenticateResult.NoResult());
+        }
 
         var providedApiKey = apiKeyHeaderValues.ToString();
 
         if (string.IsNullOrWhiteSpace(providedApiKey))
+        {
             return Task.FromResult(AuthenticateResult.NoResult());
+        }
 
         var validKeys = _configuration.GetSection("ApiKeySettings:Keys").Get<string[]>() ?? [];
 
         if (!validKeys.Contains(providedApiKey))
+        {
             return Task.FromResult(AuthenticateResult.Fail("Invalid API Key"));
+        }
 
         var claims = new[]
         {
             new Claim(ClaimTypes.Name, "ApiKeyUser"),
             new Claim(ClaimTypes.NameIdentifier, "api-key"),
-            new Claim(ClaimTypes.Role, "Admin"),
+            new Claim(ClaimTypes.Role, Roles.Admin),
             new Claim("auth_method", "ApiKey")
         };
 

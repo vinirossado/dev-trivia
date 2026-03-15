@@ -2,6 +2,7 @@
 using DevTrivia.API.Capabilities.Match.Models;
 using DevTrivia.API.Capabilities.Match.Services.Interfaces;
 using DevTrivia.API.Capabilities.Shared.Models;
+using DevTrivia.API.Capabilities.User.Enums;
 using DevTrivia.API.Infrastructure.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -38,9 +39,7 @@ public class MatchController : ControllerBase
     {
         try
         {
-            var match = request.ToEntity();
-
-            var createdMatch = await _matchService.CreateAsync(match, cancellationToken);
+            var createdMatch = await _matchService.CreateAsync(request, cancellationToken);
             var response = createdMatch.ToResponse();
 
             return CreatedAtAction(
@@ -63,7 +62,7 @@ public class MatchController : ControllerBase
     /// <summary>
     /// Update an existing match
     /// </summary>
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     [HttpPut("{id}")]
     [ProducesResponseType(typeof(ApiResponse<MatchResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
@@ -95,7 +94,7 @@ public class MatchController : ControllerBase
     /// <summary>
     /// Delete a match by ID
     /// </summary>
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     [HttpDelete("{id}")]
     [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]

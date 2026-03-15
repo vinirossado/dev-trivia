@@ -54,7 +54,7 @@ public class UserController : ControllerBase
         try
         {
             var user = await _userService.RegisterAsync(request, cancellationToken);
-            return CreatedAtAction(nameof(GetById), new { id = user.Id }, 
+            return CreatedAtAction(nameof(GetById), new { id = user.Id },
                 new ApiResponse<UserDto>(true, user, "User registered successfully"));
         }
         catch (InvalidOperationException ex)
@@ -80,7 +80,7 @@ public class UserController : ControllerBase
         try
         {
             var user = await _userService.GetByIdAsync(id, cancellationToken);
-            
+
             if (user is null)
             {
                 return NotFound(new ApiResponse<object>(false, null, $"User with ID {id} not found"));
@@ -139,7 +139,7 @@ public class UserController : ControllerBase
     public async Task<IActionResult> Update(long id, [FromBody] UpdateUserRequest request, CancellationToken cancellationToken)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var isAdmin = User.IsInRole("Admin");
+        var isAdmin = User.IsInRole(Roles.Admin);
         if (userIdClaim != id.ToString() && !isAdmin)
         {
             return Forbid();
@@ -172,7 +172,7 @@ public class UserController : ControllerBase
     public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var isAdmin = User.IsInRole("Admin");
+        var isAdmin = User.IsInRole(Roles.Admin);
         if (userIdClaim != id.ToString() && !isAdmin)
         {
             return Forbid();
@@ -181,7 +181,7 @@ public class UserController : ControllerBase
         try
         {
             var deleted = await _userService.DeleteAsync(id, cancellationToken);
-            
+
             if (!deleted)
             {
                 return NotFound(new ApiResponse<object>(false, null, $"User with ID {id} not found"));
@@ -252,7 +252,7 @@ public class UserController : ControllerBase
             }
 
             var user = await _userService.GetByIdAsync(userId, cancellationToken);
-            
+
             if (user is null)
             {
                 return NotFound(new ApiResponse<object>(false, null, "User not found"));
@@ -271,7 +271,7 @@ public class UserController : ControllerBase
     /// Change a user's role (Admin only, or via API Key)
     /// </summary>
     [HttpPut("{id}/role")]
-    [Authorize(AuthenticationSchemes = "Bearer,AuthKey", Roles = "Admin")]
+    [Authorize(AuthenticationSchemes = "Bearer,AuthKey", Roles = Roles.Admin)]
     [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ChangeRole(long id, [FromBody] ChangeRoleRequest request, CancellationToken cancellationToken)

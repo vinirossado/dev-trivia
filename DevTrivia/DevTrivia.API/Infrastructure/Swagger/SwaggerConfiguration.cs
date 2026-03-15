@@ -27,7 +27,7 @@ public static class SwaggerConfiguration
             In = ParameterLocation.Header
         });
 
-        options.AddSecurityRequirement(document => 
+        options.AddSecurityRequirement(document =>
             new OpenApiSecurityRequirement
             {
                 [new OpenApiSecuritySchemeReference(SchemeId, document)] = new List<string>([])

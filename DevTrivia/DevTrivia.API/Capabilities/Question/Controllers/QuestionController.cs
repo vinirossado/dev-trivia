@@ -1,12 +1,13 @@
-﻿using DevTrivia.API.Capabilities.Question.Extensions;
+﻿using DevTrivia.API.Capabilities.Question.Enums;
+using DevTrivia.API.Capabilities.Question.Extensions;
 using DevTrivia.API.Capabilities.Question.Models;
 using DevTrivia.API.Capabilities.Question.Services.Interfaces;
 using DevTrivia.API.Capabilities.Shared.Models;
+using DevTrivia.API.Capabilities.User.Enums;
 using DevTrivia.API.Infrastructure.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using DevTrivia.API.Capabilities.Question.Enums;
 
 namespace DevTrivia.API.Capabilities.Question.Controllers;
 
@@ -27,7 +28,7 @@ public class QuestionController : ControllerBase
     /// Create a new question
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     [ProducesResponseType(typeof(ApiResponse<QuestionResponse>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
@@ -67,7 +68,7 @@ public class QuestionController : ControllerBase
     /// Update an existing question
     /// </summary>
     [HttpPut("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     [ProducesResponseType(typeof(ApiResponse<QuestionResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
@@ -99,7 +100,7 @@ public class QuestionController : ControllerBase
     /// Delete a question by ID
     /// </summary>
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
@@ -170,7 +171,7 @@ public class QuestionController : ControllerBase
                 ApiResponse.ErrorResponse("An error occurred while retrieving the question"));
         }
     }
-    
+
     /// <summary>
     /// Get all questions by category ID
     /// </summary>
@@ -188,11 +189,11 @@ public class QuestionController : ControllerBase
         {
             var questions = await _questionService.GetByCategoryIdAsync(categoryId, cancellationToken);
             var response = questions.ToResponseList();
-            
-            var message = response.Any() 
-                ? $"Found {response.Count()} question(s) in category" 
+
+            var message = response.Any()
+                ? $"Found {response.Count()} question(s) in category"
                 : "Category found but has no questions";
-            
+
             return Ok(ApiResponse<IEnumerable<QuestionResponse>>.SuccessResponse(response, message));
         }
         catch (KeyNotFoundException ex)
@@ -202,7 +203,7 @@ public class QuestionController : ControllerBase
         catch (Exception ex)
         {
             _logger.DatabaseError("retrieving questions by category", ex.Message, ex);
-            return StatusCode((int)HttpStatusCode.InternalServerError, 
+            return StatusCode((int)HttpStatusCode.InternalServerError,
                 ApiResponse.ErrorResponse("An error occurred while retrieving questions"));
         }
     }
@@ -221,19 +222,19 @@ public class QuestionController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetByCategoryAndDifficulty(
-        long categoryId, 
-        DifficultyEnum difficulty, 
+        long categoryId,
+        DifficultyEnum difficulty,
         CancellationToken cancellationToken)
     {
         try
         {
             var questions = await _questionService.GetByCategoryAndDifficultyAsync(categoryId, difficulty, cancellationToken);
             var response = questions.ToResponseList();
-            
-            var message = response.Any() 
-                ? $"Found {response.Count()} {difficulty} question(s) in category" 
+
+            var message = response.Any()
+                ? $"Found {response.Count()} {difficulty} question(s) in category"
                 : $"Category found but has no {difficulty} questions";
-            
+
             return Ok(ApiResponse<IEnumerable<QuestionResponse>>.SuccessResponse(response, message));
         }
         catch (KeyNotFoundException ex)
@@ -243,7 +244,7 @@ public class QuestionController : ControllerBase
         catch (Exception ex)
         {
             _logger.DatabaseError("retrieving questions by category and difficulty", ex.Message, ex);
-            return StatusCode((int)HttpStatusCode.InternalServerError, 
+            return StatusCode((int)HttpStatusCode.InternalServerError,
                 ApiResponse.ErrorResponse("An error occurred while retrieving questions"));
         }
     }

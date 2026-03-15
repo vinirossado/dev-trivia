@@ -48,11 +48,7 @@ public sealed class CategoryService : ICategoryService
 
     public async Task<CategoryEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
-        var category = await _categoryRepository.GetByIdAsync(id, cancellationToken);
-        if (category == null)
-        {
-            throw new KeyNotFoundException($"Category with id {id} not found");
-        }
+        var category = await _categoryRepository.GetByIdAsync(id, cancellationToken) ?? throw new KeyNotFoundException($"Category with id {id} not found");
 
         return category;
     }
@@ -64,11 +60,7 @@ public sealed class CategoryService : ICategoryService
 
     public async Task<CategoryEntity> UpdateAsync(CategoryRequest request, long id, CancellationToken cancellationToken = default)
     {
-        var category = await _categoryRepository.GetByIdAsync(id, cancellationToken);
-        if (category == null)
-        {
-            throw new KeyNotFoundException($"Category with id {id} not found");
-        }
+        var category = await _categoryRepository.GetByIdAsync(id, cancellationToken) ?? throw new KeyNotFoundException($"Category with id {id} not found");
 
         category.Name = request.Name.ToLower();
         category.Description = request.Description;

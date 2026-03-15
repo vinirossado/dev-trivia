@@ -1,6 +1,6 @@
-﻿using DevTrivia.API.Capabilities.Shared.Models;
+﻿using DevTrivia.API.Capabilities.Match.Database.Entities;
 using DevTrivia.API.Capabilities.Question.Database.Entities;
-using DevTrivia.API.Capabilities.Match.Database.Entities;
+using DevTrivia.API.Capabilities.Shared.Models;
 
 namespace DevTrivia.API.Capabilities.Category.Database.Entities;
 

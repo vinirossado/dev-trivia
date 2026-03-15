@@ -34,12 +34,16 @@ public sealed class GamePlayService : IGamePlayService
             ?? throw new KeyNotFoundException($"Match with ID {matchId} not found");
 
         if (match.Status != StatusEnum.Pending)
+        {
             throw new InvalidOperationException("Match must be in Pending status to start");
+        }
 
         var questions = (await _questionRepository.GetByCategoryIdAsync(match.SelectedCategoryId, ct)).ToList();
 
         if (questions.Count == 0)
+        {
             throw new InvalidOperationException("No questions available for the selected category");
+        }
 
         Random.Shared.Shuffle(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(questions));
         var selectedQuestions = questions.Take(10).ToList();
@@ -74,7 +78,9 @@ public sealed class GamePlayService : IGamePlayService
             ?? throw new KeyNotFoundException($"Match with ID {matchId} not found");
 
         if (match.Status != StatusEnum.InProgress)
+        {
             throw new InvalidOperationException("Match must be in InProgress status");
+        }
 
         var nextPlayerAnswer = await _playerAnswerRepository.GetUnansweredByMatchIdAsync(matchId, ct)
             ?? throw new InvalidOperationException("All questions have been answered");
@@ -108,13 +114,17 @@ public sealed class GamePlayService : IGamePlayService
             ?? throw new KeyNotFoundException($"Match with ID {matchId} not found");
 
         if (match.Status != StatusEnum.InProgress)
+        {
             throw new InvalidOperationException("Match must be in InProgress status");
+        }
 
         var playerAnswer = await _playerAnswerRepository.GetByMatchAndQuestionAsync(matchId, request.QuestionId, ct)
             ?? throw new KeyNotFoundException($"Question {request.QuestionId} is not part of this match");
 
         if (playerAnswer.AnsweredAt != default)
+        {
             throw new InvalidOperationException("This question has already been answered");
+        }
 
         var answerOptions = await _answerOptionRepository.GetAnswerOptionsByQuestionId(request.QuestionId, ct);
         var answerOptionList = answerOptions.ToList();
@@ -160,7 +170,9 @@ public sealed class GamePlayService : IGamePlayService
             ?? throw new KeyNotFoundException($"Match with ID {matchId} not found");
 
         if (match.Status != StatusEnum.Finished)
+        {
             throw new InvalidOperationException("Match must be in Finished status to view results");
+        }
 
         var playerAnswers = (await _playerAnswerRepository.GetByMatchIdAsync(matchId, ct)).ToList();
         var totalQuestions = playerAnswers.Count;
@@ -172,7 +184,9 @@ public sealed class GamePlayService : IGamePlayService
             var options = await _answerOptionRepository.GetAnswerOptionsByQuestionId(pa.QuestionId, ct);
             var correct = options.FirstOrDefault(ao => ao.IsCorrect);
             if (correct is not null)
+            {
                 correctOptionsByQuestion[pa.QuestionId] = correct.Id;
+            }
         }
 
         return new GameResultsResponse

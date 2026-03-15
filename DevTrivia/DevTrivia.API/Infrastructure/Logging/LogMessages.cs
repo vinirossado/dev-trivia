@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Logging;
-
 namespace DevTrivia.API.Infrastructure.Logging;
 
 public static partial class LogMessages

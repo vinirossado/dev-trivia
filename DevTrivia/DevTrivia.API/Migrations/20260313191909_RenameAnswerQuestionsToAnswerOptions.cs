@@ -2,77 +2,76 @@
 
 #nullable disable
 
-namespace DevTrivia.API.Migrations
+namespace DevTrivia.API.Migrations;
+
+/// <inheritdoc />
+public partial class RenameAnswerQuestionsToAnswerOptions : Migration
 {
     /// <inheritdoc />
-    public partial class RenameAnswerQuestionsToAnswerOptions : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropForeignKey(
-                name: "FK_AnswerQuestions_Questions_QuestionId",
-                table: "AnswerQuestions");
+        migrationBuilder.DropForeignKey(
+            name: "FK_AnswerQuestions_Questions_QuestionId",
+            table: "AnswerQuestions");
 
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_AnswerQuestions",
-                table: "AnswerQuestions");
+        migrationBuilder.DropPrimaryKey(
+            name: "PK_AnswerQuestions",
+            table: "AnswerQuestions");
 
-            migrationBuilder.RenameTable(
-                name: "AnswerQuestions",
-                newName: "AnswerOptions");
+        migrationBuilder.RenameTable(
+            name: "AnswerQuestions",
+            newName: "AnswerOptions");
 
-            migrationBuilder.RenameIndex(
-                name: "IX_AnswerQuestions_QuestionId",
-                table: "AnswerOptions",
-                newName: "IX_AnswerOptions_QuestionId");
+        migrationBuilder.RenameIndex(
+            name: "IX_AnswerQuestions_QuestionId",
+            table: "AnswerOptions",
+            newName: "IX_AnswerOptions_QuestionId");
 
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_AnswerOptions",
-                table: "AnswerOptions",
-                column: "Id");
+        migrationBuilder.AddPrimaryKey(
+            name: "PK_AnswerOptions",
+            table: "AnswerOptions",
+            column: "Id");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_AnswerOptions_Questions_QuestionId",
-                table: "AnswerOptions",
-                column: "QuestionId",
-                principalTable: "Questions",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-        }
+        migrationBuilder.AddForeignKey(
+            name: "FK_AnswerOptions_Questions_QuestionId",
+            table: "AnswerOptions",
+            column: "QuestionId",
+            principalTable: "Questions",
+            principalColumn: "Id",
+            onDelete: ReferentialAction.Cascade);
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropForeignKey(
-                name: "FK_AnswerOptions_Questions_QuestionId",
-                table: "AnswerOptions");
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropForeignKey(
+            name: "FK_AnswerOptions_Questions_QuestionId",
+            table: "AnswerOptions");
 
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_AnswerOptions",
-                table: "AnswerOptions");
+        migrationBuilder.DropPrimaryKey(
+            name: "PK_AnswerOptions",
+            table: "AnswerOptions");
 
-            migrationBuilder.RenameTable(
-                name: "AnswerOptions",
-                newName: "AnswerQuestions");
+        migrationBuilder.RenameTable(
+            name: "AnswerOptions",
+            newName: "AnswerQuestions");
 
-            migrationBuilder.RenameIndex(
-                name: "IX_AnswerOptions_QuestionId",
-                table: "AnswerQuestions",
-                newName: "IX_AnswerQuestions_QuestionId");
+        migrationBuilder.RenameIndex(
+            name: "IX_AnswerOptions_QuestionId",
+            table: "AnswerQuestions",
+            newName: "IX_AnswerQuestions_QuestionId");
 
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_AnswerQuestions",
-                table: "AnswerQuestions",
-                column: "Id");
+        migrationBuilder.AddPrimaryKey(
+            name: "PK_AnswerQuestions",
+            table: "AnswerQuestions",
+            column: "Id");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_AnswerQuestions_Questions_QuestionId",
-                table: "AnswerQuestions",
-                column: "QuestionId",
-                principalTable: "Questions",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-        }
+        migrationBuilder.AddForeignKey(
+            name: "FK_AnswerQuestions_Questions_QuestionId",
+            table: "AnswerQuestions",
+            column: "QuestionId",
+            principalTable: "Questions",
+            principalColumn: "Id",
+            onDelete: ReferentialAction.Cascade);
     }
 }

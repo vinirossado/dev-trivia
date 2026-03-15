@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DevTrivia.API.Capabilities.AnswerOptions.Repositories;
 
-public class AnswerOptionRepository  : BaseRepository<AnswerOptionEntity>, IAnswerOptionRepository
+public class AnswerOptionRepository : BaseRepository<AnswerOptionEntity>, IAnswerOptionRepository
 {
     public AnswerOptionRepository(TriviaDbContext context) : base(context)
     {
@@ -21,9 +21,9 @@ public class AnswerOptionRepository  : BaseRepository<AnswerOptionEntity>, IAnsw
 
     public override async Task<IEnumerable<AnswerOptionEntity>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-       return await DbSet
-           .Include(x => x.QuestionEntity)
-           .ToListAsync(cancellationToken);
+        return await DbSet
+            .Include(x => x.QuestionEntity)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<AnswerOptionEntity>> GetAnswerOptionsByQuestionId(long questionId, CancellationToken cancellationToken = default)

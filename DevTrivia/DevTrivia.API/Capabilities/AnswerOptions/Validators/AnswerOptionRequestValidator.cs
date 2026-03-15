@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace DevTrivia.API.Capabilities.AnswerOptions.Validators;
 
-public class AnswerOptionRequestValidator: AbstractValidator<AnswerOptionRequest>
+public class AnswerOptionRequestValidator : AbstractValidator<AnswerOptionRequest>
 {
     public AnswerOptionRequestValidator()
     {
@@ -17,5 +17,4 @@ public class AnswerOptionRequestValidator: AbstractValidator<AnswerOptionRequest
             .WithMessage("QuestionId must be a valid value");
 
     }
-   
 }

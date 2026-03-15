@@ -48,11 +48,13 @@ public abstract class BaseRepository<TEntity> : IRepository<TEntity> where TEnti
     {
         var entity = await GetByIdAsync(id, cancellationToken);
         if (entity == null)
+        {
             return false;
+        }
 
         DbSet.Remove(entity);
         await Context.SaveChangesAsync(cancellationToken);
-        
+
         return true;
     }
 

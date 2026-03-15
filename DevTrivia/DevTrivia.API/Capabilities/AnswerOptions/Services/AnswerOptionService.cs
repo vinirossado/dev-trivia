@@ -25,9 +25,7 @@ public sealed class AnswerOptionService : IAnswerOptionService
 
     public async Task<AnswerOptionEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
-        var option = await _answerOptionRepository.GetByIdAsync(id, cancellationToken);
-        if (option is null)
-            throw new KeyNotFoundException($"Answer option with id {id} not found");
+        var option = await _answerOptionRepository.GetByIdAsync(id, cancellationToken) ?? throw new KeyNotFoundException($"Answer option with id {id} not found");
 
         return option;
     }
@@ -52,16 +50,22 @@ public sealed class AnswerOptionService : IAnswerOptionService
     {
         var questionExists = await _questionRepository.ExistsAsync(request.QuestionId, cancellationToken);
         if (!questionExists)
+        {
             throw new KeyNotFoundException($"Question with id {request.QuestionId} not found");
+        }
 
         var existing = await _answerOptionRepository.GetAnswerOptionsByQuestionId(request.QuestionId, cancellationToken);
         var existingList = existing.ToList();
 
         if (existingList.Count >= 4)
+        {
             throw new InvalidOperationException("A question can have at most 4 answer options");
+        }
 
         if (request.IsCorrect && existingList.Any(a => a.IsCorrect))
+        {
             throw new InvalidOperationException("A correct answer already exists for this question");
+        }
 
         var entity = request.ToEntity();
         return await _answerOptionRepository.AddAsync(entity, cancellationToken);
@@ -69,22 +73,24 @@ public sealed class AnswerOptionService : IAnswerOptionService
 
     public async Task<AnswerOptionEntity> UpdateAsync(AnswerOptionRequest request, long id, CancellationToken cancellationToken = default)
     {
-        var option = await _answerOptionRepository.GetByIdAsync(id, cancellationToken);
-        if (option is null)
-            throw new KeyNotFoundException($"Answer option with id {id} not found");
+        var option = await _answerOptionRepository.GetByIdAsync(id, cancellationToken) ?? throw new KeyNotFoundException($"Answer option with id {id} not found");
 
         if (option.QuestionId != request.QuestionId)
         {
             var questionExists = await _questionRepository.ExistsAsync(request.QuestionId, cancellationToken);
             if (!questionExists)
+            {
                 throw new KeyNotFoundException($"Question with id {request.QuestionId} not found");
+            }
         }
 
         if (request.IsCorrect && !option.IsCorrect)
         {
             var existing = await _answerOptionRepository.GetAnswerOptionsByQuestionId(request.QuestionId, cancellationToken);
             if (existing.Any(a => a.IsCorrect && a.Id != id))
+            {
                 throw new InvalidOperationException("A correct answer already exists for this question");
+            }
         }
 
         option.Text = request.Text;
@@ -98,7 +104,9 @@ public sealed class AnswerOptionService : IAnswerOptionService
     {
         var exists = await _answerOptionRepository.ExistsAsync(id, cancellationToken);
         if (!exists)
+        {
             throw new KeyNotFoundException($"Answer option with id {id} not found");
+        }
 
         return await _answerOptionRepository.DeleteAsync(id, cancellationToken);
     }

@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using DevTrivia.API.Capabilities.Category.Repositories.Interfaces;
+﻿using DevTrivia.API.Capabilities.Category.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Question.Database.Entities;
 using DevTrivia.API.Capabilities.Question.Enums;
 using DevTrivia.API.Capabilities.Question.Extensions;
@@ -64,14 +64,14 @@ public sealed class QuestionService : IQuestionService
         }
 
         var questions = await _questionRepository.GetByCategoryIdAsync(categoryId, cancellationToken);
-        
+
         // Return empty list is OK - category exists but has no questions
         return questions;
     }
 
     public async Task<IEnumerable<QuestionEntity>> GetByCategoryAndDifficultyAsync(
-        long categoryId, 
-        DifficultyEnum difficulty, 
+        long categoryId,
+        DifficultyEnum difficulty,
         CancellationToken cancellationToken = default)
     {
         // Validate category exists
@@ -82,7 +82,7 @@ public sealed class QuestionService : IQuestionService
         }
 
         var questions = await _questionRepository.GetByCategoryAndDifficultyAsync(categoryId, difficulty, cancellationToken);
-        
+
         // Return empty list is OK - category exists but has no questions with that difficulty
         return questions;
     }
@@ -94,22 +94,14 @@ public sealed class QuestionService : IQuestionService
 
     public async Task<QuestionEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
-        var question = await _questionRepository.GetByIdAsync(id, cancellationToken);
-        if (question == null)
-        {
-            throw new KeyNotFoundException($"Question with id {id} not found");
-        }
+        var question = await _questionRepository.GetByIdAsync(id, cancellationToken) ?? throw new KeyNotFoundException($"Question with id {id} not found");
 
         return question;
     }
 
     public async Task<QuestionEntity> UpdateAsync(QuestionRequest request, long id, CancellationToken cancellationToken = default)
     {
-        var question = await _questionRepository.GetByIdAsync(id, cancellationToken);
-        if (question == null)
-        {
-            throw new KeyNotFoundException($"Question with id {id} not found");
-        }
+        var question = await _questionRepository.GetByIdAsync(id, cancellationToken) ?? throw new KeyNotFoundException($"Question with id {id} not found");
 
         // Validate category exists if it's being changed
         if (question.CategoryId != request.CategoryId)
@@ -125,7 +117,7 @@ public sealed class QuestionService : IQuestionService
         question.Description = request.Description;
         question.Difficulty = request.Difficulty;
         question.CategoryId = request.CategoryId;
-        
+
         return await _questionRepository.UpdateAsync(question, cancellationToken);
     }
 }

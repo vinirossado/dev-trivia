@@ -1,4 +1,3 @@
-using System.Text;
 using DevTrivia.API.Capabilities.User.Database.Entities;
 using DevTrivia.API.Capabilities.User.Enums;
 using DevTrivia.API.Capabilities.User.Models;
@@ -6,6 +5,7 @@ using DevTrivia.API.Capabilities.User.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.User.Services.Interfaces;
 using DevTrivia.API.Infrastructure.Logging;
 using Jose;
+using System.Text;
 
 namespace DevTrivia.API.Capabilities.User.Services;
 
@@ -33,7 +33,7 @@ public sealed class UserService : IUserService
         _logger.UserLoginAttempt(request.Email);
 
         var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
-        
+
         if (user is null || !VerifyPassword(request.Password, user.PasswordHash ?? string.Empty))
         {
             _logger.UserLoginFailed(request.Email);
@@ -48,7 +48,7 @@ public sealed class UserService : IUserService
         _logger.UserLoginSuccessful(request.Email, user.Id);
 
         var expirationMinutes = _configuration.GetValue<int>("JwtSettings:ExpirationInMinutes", 60);
-        
+
         return new LoginResponse
         {
             Token = token,
@@ -101,9 +101,20 @@ public sealed class UserService : IUserService
 
     public async Task<(IEnumerable<UserDto> Users, int TotalCount)> GetAllAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
-        if (page < 1) page = 1;
-        if (pageSize < 1) pageSize = 10;
-        if (pageSize > 100) pageSize = 100;
+        if (page < 1)
+        {
+            page = 1;
+        }
+
+        if (pageSize < 1)
+        {
+            pageSize = 10;
+        }
+
+        if (pageSize > 100)
+        {
+            pageSize = 100;
+        }
 
         _logger.FetchingAllUsers(page, pageSize);
         var allUsers = await _userRepository.GetAllAsync(cancellationToken);
@@ -120,7 +131,7 @@ public sealed class UserService : IUserService
     public async Task<UserDto> UpdateAsync(long id, UpdateUserRequest request, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByIdAsync(id, cancellationToken);
-        
+
         if (user is null)
         {
             _logger.UserNotFound(id);
@@ -129,22 +140,34 @@ public sealed class UserService : IUserService
 
         // Update only provided fields
         if (!string.IsNullOrWhiteSpace(request.Name))
+        {
             user.Name = request.Name;
+        }
 
         if (request.Bio is not null)
+        {
             user.Bio = request.Bio;
+        }
 
         if (request.Location is not null)
+        {
             user.Location = request.Location;
+        }
 
         if (request.DateOfBirth.HasValue)
+        {
             user.DateOfBirth = request.DateOfBirth;
+        }
 
         if (!string.IsNullOrWhiteSpace(request.ProfileImageUrl))
+        {
             user.ProfileImageUrl = new Uri(request.ProfileImageUrl);
+        }
 
         if (!string.IsNullOrWhiteSpace(request.PreferredLanguage))
+        {
             user.PreferredLanguage = request.PreferredLanguage;
+        }
 
         var updatedUser = await _userRepository.UpdateAsync(user, cancellationToken);
         return MapToDto(updatedUser);
@@ -168,7 +191,7 @@ public sealed class UserService : IUserService
     public async Task<bool> ChangePasswordAsync(long id, ChangePasswordRequest request, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByIdAsync(id, cancellationToken);
-        
+
         if (user is null)
         {
             _logger.UserNotFound(id);
