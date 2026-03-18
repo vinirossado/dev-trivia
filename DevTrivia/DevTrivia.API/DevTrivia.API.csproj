@@ -40,6 +40,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Capabilities\PlayerStats\Validators\" />
       <Folder Include="Capabilities\User\Controllers\" />
       <Folder Include="Capabilities\User\Repositories\Interfaces\" />
       <Folder Include="Infrastructure\Logging\" />
