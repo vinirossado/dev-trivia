@@ -67,8 +67,8 @@ public class PlayerStatsController : ControllerBase
     {
         try
         {
-            var updatedMatch = await _playerstatsService.UpdateAsync(request, request.UserId, cancellationToken);
-            var response = updatedMatch.ToResponse();
+            var updated = await _playerstatsService.UpdateAsync(request, request.UserId, cancellationToken);
+            var response = updated.ToResponse();
 
             return Ok(ApiResponse<PlayerStatsResponse>.SuccessResponse(response, "Player stats updated successfully"));
         }
