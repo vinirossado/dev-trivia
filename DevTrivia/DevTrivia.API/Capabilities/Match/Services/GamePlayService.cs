@@ -1,3 +1,4 @@
+using Azure.Core;
 using DevTrivia.API.Capabilities.AnswerOptions.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Match.Enums;
 using DevTrivia.API.Capabilities.Match.Models;
@@ -5,6 +6,9 @@ using DevTrivia.API.Capabilities.Match.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Match.Services.Interfaces;
 using DevTrivia.API.Capabilities.PlayerAnswer.Database.Entities;
 using DevTrivia.API.Capabilities.PlayerAnswer.Repositories.Interfaces;
+using DevTrivia.API.Capabilities.PlayerStats.Enums;
+using DevTrivia.API.Capabilities.PlayerStats.Models;
+using DevTrivia.API.Capabilities.PlayerStats.Services.Interfaces;
 using DevTrivia.API.Capabilities.Question.Repositories.Interfaces;
 
 namespace DevTrivia.API.Capabilities.Match.Services;
@@ -15,17 +19,20 @@ public sealed class GamePlayService : IGamePlayService
     private readonly IQuestionRepository _questionRepository;
     private readonly IAnswerOptionRepository _answerOptionRepository;
     private readonly IPlayerAnswerRepository _playerAnswerRepository;
+    private readonly IPlayerStatsService _playerStatsService;
 
     public GamePlayService(
         IMatchRepository matchRepository,
         IQuestionRepository questionRepository,
         IAnswerOptionRepository answerOptionRepository,
+        IPlayerStatsService playerStatsService,
         IPlayerAnswerRepository playerAnswerRepository)
     {
         _matchRepository = matchRepository;
         _questionRepository = questionRepository;
         _answerOptionRepository = answerOptionRepository;
         _playerAnswerRepository = playerAnswerRepository;
+        _playerStatsService = playerStatsService;
     }
 
     public async Task<GameStartResponse> StartMatchAsync(long matchId, CancellationToken ct = default)
@@ -187,6 +194,26 @@ public sealed class GamePlayService : IGamePlayService
             {
                 correctOptionsByQuestion[pa.QuestionId] = correct.Id;
             }
+        }
+
+        var playerStats = await _playerStatsService.GetStatsByUserIdAsync(match.UserId);
+        if (playerStats == null)
+        {
+            await _playerStatsService.CreateAsync(new PlayerStatsRequest
+            {
+                UserId = match.UserId,
+                TotalCorrect = correctAnswers,
+                EloRating = EloRating.Bronze
+            });
+        }
+        else
+        {
+            await _playerStatsService.UpdateAsync(new PlayerStatsRequest
+            {
+                UserId = match.UserId,
+                TotalCorrect = playerStats.TotalCorrect,
+                EloRating = EloRating.Prata
+            });
         }
 
         return new GameResultsResponse

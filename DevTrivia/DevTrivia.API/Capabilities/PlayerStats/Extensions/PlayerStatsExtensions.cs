@@ -21,9 +21,9 @@ public static class PlayerStatsMappingExtensions
         return new PlayerStatsEntity
         {
             UserId = request.UserId,
-            TotalMatches = request.TotalMatches,
             TotalCorrect = request.TotalCorrect,
-            EloRating = request.EloRating
+            EloRating = request.EloRating,
+            CreatedAt = DateTime.UtcNow,
         };
     }
 

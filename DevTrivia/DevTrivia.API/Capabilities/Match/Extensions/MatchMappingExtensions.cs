@@ -21,6 +21,7 @@ public static class MatchMappingExtensions
         return new MatchEntity
         {
             Status = request.Status,
+            UserId = request.UserId,
             SelectedCategoryId = request.SelectedCategoryId
         };
     }

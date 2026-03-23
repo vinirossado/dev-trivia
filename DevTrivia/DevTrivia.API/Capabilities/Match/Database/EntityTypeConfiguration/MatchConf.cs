@@ -8,6 +8,8 @@ public class MatchConf : IEntityTypeConfiguration<MatchEntity>
 {
     public void Configure(EntityTypeBuilder<MatchEntity> builder)
     {
+        builder.ToTable("Matches");
+
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).IsRequired();
 
@@ -22,5 +24,10 @@ public class MatchConf : IEntityTypeConfiguration<MatchEntity>
         builder.HasOne(x => x.Category)
             .WithMany(x => x.Matches)
             .HasForeignKey(x => x.SelectedCategoryId);
+
+        //Relationships
+        builder.HasOne(x => x.User)
+            .WithMany(x => x.Matches)
+            .HasForeignKey(x => x.UserId);
     }
 }

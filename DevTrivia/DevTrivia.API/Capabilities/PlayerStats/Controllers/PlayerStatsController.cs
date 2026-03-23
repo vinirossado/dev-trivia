@@ -3,7 +3,9 @@ using DevTrivia.API.Capabilities.PlayerStats.Extensions;
 using DevTrivia.API.Capabilities.PlayerStats.Models;
 using DevTrivia.API.Capabilities.PlayerStats.Services.Interfaces;
 using DevTrivia.API.Capabilities.Shared.Models;
+using DevTrivia.API.Capabilities.User.Enums;
 using DevTrivia.API.Infrastructure.Logging;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -13,18 +15,19 @@ namespace DevTrivia.API.Capabilities.PlayerStats.Controllers;
 [Route("api/[controller]")]
 public class PlayerStatsController : ControllerBase
 {
-    private readonly IPlayerStatsService _playerstatsService;
+    private readonly IPlayerStatsService _playerStatsService;
     private readonly ILogger<PlayerStatsController> _logger;
 
-    public PlayerStatsController(IPlayerStatsService playerstatsService, ILogger<PlayerStatsController> logger)
+    public PlayerStatsController(IPlayerStatsService playerStatsService, ILogger<PlayerStatsController> logger)
     {
-        _playerstatsService = playerstatsService;
+        _playerStatsService = playerStatsService;
         _logger = logger;
     }
 
     /// <summary>
     /// Create a new playerstats
     /// </summary>
+    //[Authorize(Roles = Roles.Admin)]
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponse<PlayerStatsResponse>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
@@ -35,10 +38,8 @@ public class PlayerStatsController : ControllerBase
     {
         try
         {
-            var playerstats = request.ToEntity();
-
-            var createdPlayerstats = await _playerstatsService.CreateAsync(playerstats, cancellationToken);
-            var response = createdPlayerstats.ToResponse();
+            var createdPlayerStats = await _playerStatsService.CreateAsync(request, cancellationToken);
+            var response = createdPlayerStats.ToResponse();
 
             return Ok(ApiResponse<PlayerStatsResponse>.SuccessResponse(response, "Player stats created successfully"));
         }
@@ -57,6 +58,7 @@ public class PlayerStatsController : ControllerBase
     /// <summary>
     /// Update an existing playerstats
     /// </summary>
+    [Authorize(Roles = Roles.Admin)]
     [HttpPut]
     [ProducesResponseType(typeof(ApiResponse<PlayerStatsResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
@@ -67,7 +69,7 @@ public class PlayerStatsController : ControllerBase
     {
         try
         {
-            var updated = await _playerstatsService.UpdateAsync(request, request.UserId, cancellationToken);
+            var updated = await _playerStatsService.UpdateAsync(request, cancellationToken);
             var response = updated.ToResponse();
 
             return Ok(ApiResponse<PlayerStatsResponse>.SuccessResponse(response, "Player stats updated successfully"));
@@ -75,6 +77,10 @@ public class PlayerStatsController : ControllerBase
         catch (KeyNotFoundException ex)
         {
             return NotFound(ApiResponse.ErrorResponse(ex.Message));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ApiResponse.ErrorResponse(ex.Message));
         }
         catch (Exception ex)
         {
@@ -87,6 +93,7 @@ public class PlayerStatsController : ControllerBase
     /// <summary>
     /// Delete a playerstats by UserID
     /// </summary>
+    [Authorize(Roles = Roles.Admin)]
     [HttpDelete("{id}")]
     [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
@@ -94,7 +101,8 @@ public class PlayerStatsController : ControllerBase
     {
         try
         {
-            var deleted = await _playerstatsService.DeleteAsync(id, cancellationToken);
+            var deleted = await _playerStatsService.DeleteAsync(id, cancellationToken);
+
             return Ok(ApiResponse<bool>.SuccessResponse(deleted, "Player stats deleted successfully"));
         }
         catch (KeyNotFoundException ex)
@@ -112,14 +120,15 @@ public class PlayerStatsController : ControllerBase
     /// <summary>
     /// Get all playerstats
     /// </summary>
+    [Authorize (Roles = Roles.Admin)]
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<PlayerStatsResponse>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         try
         {
-            var playerstats = await _playerstatsService.GetAllAsync(cancellationToken);
-            var response = playerstats.ToResponseList();
+            var playerStats = await _playerStatsService.GetAllAsync(cancellationToken);
+            var response = playerStats.ToResponseList();
 
             return Ok(ApiResponse<IEnumerable<PlayerStatsResponse>>.SuccessResponse(
                 response, "Player stats retrieved successfully"));
@@ -128,13 +137,14 @@ public class PlayerStatsController : ControllerBase
         {
             _logger.DatabaseError("retrieving player stats", ex.Message, ex);
             return StatusCode((int)HttpStatusCode.InternalServerError,
-                ApiResponse.ErrorResponse("An error occurred while retrieving palyer stats"));
+                ApiResponse.ErrorResponse("An error occurred while retrieving player stats"));
         }
     }
 
     /// <summary>
     /// Get a playerstats by UserID
     /// </summary>
+    [Authorize]
     [HttpGet("user/{id}")]
     [ProducesResponseType(typeof(ApiResponse<PlayerStatsResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
@@ -142,8 +152,8 @@ public class PlayerStatsController : ControllerBase
     {
         try
         {
-            var playerstats = await _playerstatsService.GetByIdAsync(id, cancellationToken);
-            var response = playerstats!.ToResponse();
+            var playerStats = await _playerStatsService.GetByIdAsync(id, cancellationToken);
+            var response = playerStats.ToResponse();
 
             return Ok(ApiResponse<PlayerStatsResponse>.SuccessResponse(response, "Player stats retrieved successfully"));
         }

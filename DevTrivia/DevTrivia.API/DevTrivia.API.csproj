@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Content Remove="appsettings.Development.json" />
+      <Content Remove=".json" />
     </ItemGroup>
 
     <ItemGroup>
@@ -44,10 +44,6 @@
       <Folder Include="Capabilities\User\Controllers\" />
       <Folder Include="Capabilities\User\Repositories\Interfaces\" />
       <Folder Include="Infrastructure\Logging\" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Include="appsettings.Development.json" />
     </ItemGroup>
 
 </Project>

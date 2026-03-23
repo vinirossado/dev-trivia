@@ -1,99 +1,94 @@
 ﻿using DevTrivia.API.Capabilities.PlayerStats.Database.Entities;
+using DevTrivia.API.Capabilities.PlayerStats.Extensions;
 using DevTrivia.API.Capabilities.PlayerStats.Models;
 using DevTrivia.API.Capabilities.PlayerStats.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.PlayerStats.Services.Interfaces;
-using DevTrivia.API.Capabilities.User.Repositories.Interfaces;
 
 namespace DevTrivia.API.Capabilities.PlayerStats.Services;
 
 public sealed class PlayerStatsService : IPlayerStatsService
 {
-    private readonly IPlayerStatsRepository _playerstatsRepository;
-    private readonly IUserRepository _userRepository;
+    private readonly IPlayerStatsRepository _playerStatsRepository;
     private readonly ILogger<PlayerStatsService> _logger;
 
     public PlayerStatsService(
-        IPlayerStatsRepository playerstatsRepository,
-        IUserRepository userRepository,
+        IPlayerStatsRepository playerStatsRepository,
         ILogger<PlayerStatsService> logger)
     {
-        _playerstatsRepository = playerstatsRepository;
-        _userRepository = userRepository;
+        _playerStatsRepository = playerStatsRepository;
         _logger = logger;
     }
 
-    public async Task<PlayerStatsEntity> CreateAsync(PlayerStatsEntity playerstats, CancellationToken cancellationToken = default)
+    public async Task<PlayerStatsEntity> CreateAsync(PlayerStatsRequest request, CancellationToken cancellationToken = default)
     {
-        var playerstatsExists = await _playerstatsRepository.ExistsByUserIdAsync(playerstats.UserId);
-        if (playerstatsExists)
+        var playerStatsExists = await _playerStatsRepository.GetStatsByUserIdAsync(request.UserId);
+        if (playerStatsExists is not null)
         {
-            throw new InvalidOperationException($"Player stats already exists for user {playerstats.UserId}");
+            throw new InvalidOperationException($"Player stats already exists for user {request.UserId}");
         }
-        else if ((int)playerstats.EloRating <= 0 || (int)playerstats.EloRating >= 9)
+        else if ((int)request.EloRating <= 0 || (int)request.EloRating >= 9)
         {
-            throw new InvalidOperationException($"Player stats with EloRating {playerstats.EloRating} cannot exist");
+            throw new InvalidOperationException($"Player stats with EloRating {request.EloRating} cannot exist");
         }
 
-        return await _playerstatsRepository.AddAsync(playerstats, cancellationToken);
+        return await _playerStatsRepository.AddAsync(request.ToEntity(), cancellationToken);
     }
 
     public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.ExistsAsync(id, cancellationToken);
-        if (!user)
+        var playerStats = await _playerStatsRepository.GetStatsByUserIdAsync(id, cancellationToken);
+        if (playerStats == null)
         {
-            throw new KeyNotFoundException($"Stats with id {id} not found");
+            throw new KeyNotFoundException($"Player stats with id {id} not found");
         }
 
-        var UserId = await _playerstatsRepository.StatsAsync(id, cancellationToken);
-        var deletedId = UserId.Id;
-        return await _playerstatsRepository.DeleteAsync(deletedId, cancellationToken);
+        return await _playerStatsRepository.DeleteAsync(playerStats.Id, cancellationToken);
     }
 
     public async Task<IEnumerable<PlayerStatsEntity>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await _playerstatsRepository.GetAllAsync(cancellationToken);
+        return await _playerStatsRepository.GetAllAsync(cancellationToken);
     }
 
-    public async Task<PlayerStatsEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
+    public async Task<PlayerStatsEntity> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
-
-        var userExist = await _userRepository.ExistsAsync(id, cancellationToken);
-        if (!userExist)
-        {
-            throw new InvalidOperationException($"Player stats already exists for user");
-        }
-
-        var playerstats = await _playerstatsRepository.StatsAsync(id, cancellationToken);
-        if(playerstats == null)
+        var playerStats = await _playerStatsRepository.GetStatsByUserIdAsync(id, cancellationToken);
+        if (playerStats == null)
         {
             throw new KeyNotFoundException($"Stats with id {id} not found");
         }
 
-        return playerstats;
+        return playerStats;
+    }
+
+    public async Task<PlayerStatsEntity?> GetStatsByUserIdAsync(long userId, CancellationToken cancellationToken = default)
+    {
+        var playerStats = await _playerStatsRepository.GetStatsByUserIdAsync(userId, cancellationToken);
+
+        return playerStats;
     }
 
     public async Task<long> GetTotalCountAsync(CancellationToken cancellationToken = default)
     {
-        return await _playerstatsRepository.GetTotalCountAsync(cancellationToken);
+        return await _playerStatsRepository.GetTotalCountAsync(cancellationToken);
     }
 
-    public async Task<PlayerStatsEntity> UpdateAsync(PlayerStatsRequest request, long id, CancellationToken cancellationToken = default)
+    public async Task<PlayerStatsEntity> UpdateAsync(PlayerStatsRequest request, CancellationToken cancellationToken = default)
     {
-        var palyerstats = await _playerstatsRepository.StatsAsync(id, cancellationToken);
-        if (palyerstats == null)
+        var playerStats = await _playerStatsRepository.GetStatsByUserIdAsync(request.UserId, cancellationToken);
+        if (playerStats == null)
         {
-            throw new KeyNotFoundException($"Stats with id {id} not found");
+            throw new KeyNotFoundException($"Stats with id {request.UserId} not found");
         }
-        else if ((int)request.EloRating <= 0 || (int)request.EloRating > 9)
+        else if ((int)request.EloRating <= 0 || (int)request.EloRating >= 9)
         {
-            throw new KeyNotFoundException($"Stats with status {request.EloRating} cannot exist");
+            throw new InvalidOperationException($"Stats with status {request.EloRating} cannot exist");
         }
 
-        palyerstats.TotalMatches = request.TotalMatches;
-        palyerstats.TotalCorrect = request.TotalCorrect;
-        palyerstats.EloRating = request.EloRating;
+        playerStats.TotalCorrect += request.TotalCorrect;
+        playerStats.TotalMatches++;
+        playerStats.EloRating = request.EloRating;
 
-        return await _playerstatsRepository.UpdateAsync(palyerstats, cancellationToken);
+        return await _playerStatsRepository.UpdateAsync(playerStats, cancellationToken);
     }
 }

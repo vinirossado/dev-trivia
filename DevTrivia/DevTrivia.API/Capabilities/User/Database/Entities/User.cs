@@ -1,3 +1,4 @@
+using DevTrivia.API.Capabilities.Match.Database.Entities;
 using DevTrivia.API.Capabilities.PlayerStats.Database.Entities;
 using DevTrivia.API.Capabilities.Shared.Models;
 using DevTrivia.API.Capabilities.User.Enums;
@@ -9,6 +10,7 @@ public sealed class UserEntity : BaseEntity
 {
     public RoleEnum Role { get; set; } = RoleEnum.Player;
     public ICollection<PlayerStatsEntity> PlayerStats { get; } = new List<PlayerStatsEntity>();
+    public ICollection<MatchEntity> Matches { get; } = new List<MatchEntity>();
 
     public required string Name { get; set; } = string.Empty;
 

@@ -6,6 +6,8 @@ using DevTrivia.API.Capabilities.Match.Database.Entities;
 using DevTrivia.API.Capabilities.Match.Database.EntityTypeConfiguration;
 using DevTrivia.API.Capabilities.PlayerAnswer.Database.Entities;
 using DevTrivia.API.Capabilities.PlayerAnswer.Database.EntityTypeConfiguration;
+using DevTrivia.API.Capabilities.PlayerStats.Database.Entities;
+using DevTrivia.API.Capabilities.PlayerStats.Database.EntityTypeConfiguration;
 using DevTrivia.API.Capabilities.Question.Database.Entities;
 using DevTrivia.API.Capabilities.Question.Database.EntityTypeConfiguration;
 using DevTrivia.API.Capabilities.User.Database.Entities;
@@ -21,6 +23,7 @@ public class TriviaDbContext(DbContextOptions<TriviaDbContext> options) : DbCont
     public DbSet<QuestionEntity> Questions { get; set; }
     public DbSet<AnswerOptionEntity> AnswerOptions { get; set; }
     public DbSet<MatchEntity> Matches { get; set; }
+    public DbSet<PlayerStatsEntity> PlayerStats { get; set; }
     public DbSet<PlayerAnswerEntity> PlayerAnswers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -67,6 +70,7 @@ public class TriviaDbContext(DbContextOptions<TriviaDbContext> options) : DbCont
         new QuestionConf().Configure(modelBuilder.Entity<QuestionEntity>());
         new AnswerOptionConf().Configure(modelBuilder.Entity<AnswerOptionEntity>());
         new MatchConf().Configure(modelBuilder.Entity<MatchEntity>());
+        new PlayerStatsConf().Configure(modelBuilder.Entity<PlayerStatsEntity>());
         new PlayerAnswerConf().Configure(modelBuilder.Entity<PlayerAnswerEntity>());
     }
 }

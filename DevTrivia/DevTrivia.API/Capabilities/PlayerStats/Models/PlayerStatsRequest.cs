@@ -4,8 +4,7 @@ namespace DevTrivia.API.Capabilities.PlayerStats.Models;
 
 public record PlayerStatsRequest
 {
-    public long UserId { get; init; }
-    public required long TotalMatches { get; init; }
+    public required long UserId { get; init; }
     public required long TotalCorrect { get; init; }
     public required EloRating EloRating { get; init; }
 }
