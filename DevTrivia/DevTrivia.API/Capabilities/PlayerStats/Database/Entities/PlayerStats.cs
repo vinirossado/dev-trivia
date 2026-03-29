@@ -4,7 +4,7 @@ using DevTrivia.API.Capabilities.User.Database.Entities;
 
 namespace DevTrivia.API.Capabilities.PlayerStats.Database.Entities;
 
-public class PlayerStatsEntity : BaseEntity
+public sealed class PlayerStatsEntity : BaseEntity
 {
     public required long UserId { get; set; }
     public long TotalMatches { get; set; } = 1;

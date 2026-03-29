@@ -53,5 +53,13 @@ public class UserConf : IEntityTypeConfiguration<UserEntity>
 
         builder.HasIndex(x => new { x.AuthProvider, x.ExternalId })
             .IsUnique();
+        
+        builder.HasMany(x => x.Matches)
+            .WithOne(x => x.User)
+            .HasForeignKey(x => x.UserId);
+        
+        builder.HasMany(x => x.PlayerStats)
+            .WithOne(x => x.User)
+            .HasForeignKey(x => x.UserId);
     }
 }

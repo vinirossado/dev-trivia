@@ -35,9 +35,9 @@ public sealed class GamePlayService : IGamePlayService
         _playerStatsService = playerStatsService;
     }
 
-    public async Task<GameStartResponse> StartMatchAsync(long matchId, CancellationToken ct = default)
+    public async Task<GameStartResponse> StartMatchAsync(long matchId, CancellationToken cancellationToken = default)
     {
-        var match = await _matchRepository.GetByIdAsync(matchId, ct)
+        var match = await _matchRepository.GetByIdAsync(matchId, cancellationToken)
             ?? throw new KeyNotFoundException($"Match with ID {matchId} not found");
 
         if (match.Status != StatusEnum.Pending)
@@ -45,7 +45,7 @@ public sealed class GamePlayService : IGamePlayService
             throw new InvalidOperationException("Match must be in Pending status to start");
         }
 
-        var questions = (await _questionRepository.GetByCategoryIdAsync(match.SelectedCategoryId, ct)).ToList();
+        var questions = (await _questionRepository.GetByCategoryIdAsync(match.SelectedCategoryId, cancellationToken)).ToList();
 
         if (questions.Count == 0)
         {
@@ -63,12 +63,12 @@ public sealed class GamePlayService : IGamePlayService
                 QuestionId = question.Id,
                 IsCorrect = false,
                 AnsweredAt = default
-            }, ct);
+            }, cancellationToken);
         }
 
         match.Status = StatusEnum.InProgress;
         match.CreatedAt = DateTime.UtcNow;
-        await _matchRepository.UpdateAsync(match, ct);
+        await _matchRepository.UpdateAsync(match, cancellationToken);
 
         return new GameStartResponse
         {
@@ -79,9 +79,9 @@ public sealed class GamePlayService : IGamePlayService
         };
     }
 
-    public async Task<GameQuestionResponse> GetNextQuestionAsync(long matchId, CancellationToken ct = default)
+    public async Task<GameQuestionResponse> GetNextQuestionAsync(long matchId, CancellationToken cancellationToken = default)
     {
-        var match = await _matchRepository.GetByIdAsync(matchId, ct)
+        var match = await _matchRepository.GetByIdAsync(matchId, cancellationToken)
             ?? throw new KeyNotFoundException($"Match with ID {matchId} not found");
 
         if (match.Status != StatusEnum.InProgress)
@@ -89,14 +89,14 @@ public sealed class GamePlayService : IGamePlayService
             throw new InvalidOperationException("Match must be in InProgress status");
         }
 
-        var nextPlayerAnswer = await _playerAnswerRepository.GetUnansweredByMatchIdAsync(matchId, ct)
+        var nextPlayerAnswer = await _playerAnswerRepository.GetUnansweredByMatchIdAsync(matchId, cancellationToken)
             ?? throw new InvalidOperationException("All questions have been answered");
 
-        var allPlayerAnswers = await _playerAnswerRepository.GetByMatchIdAsync(matchId, ct);
+        var allPlayerAnswers = await _playerAnswerRepository.GetByMatchIdAsync(matchId, cancellationToken);
         var playerAnswerList = allPlayerAnswers.ToList();
         var answeredCount = playerAnswerList.Count(pa => pa.AnsweredAt != default);
 
-        var answerOptions = (await _answerOptionRepository.GetAnswerOptionsByQuestionId(nextPlayerAnswer.QuestionId, ct)).ToList();
+        var answerOptions = (await _answerOptionRepository.GetAnswerOptionsByQuestionId(nextPlayerAnswer.QuestionId, cancellationToken)).ToList();
         Random.Shared.Shuffle(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(answerOptions));
 
         var shuffledOptions = answerOptions.Select(ao => new GameAnswerOption
@@ -115,9 +115,9 @@ public sealed class GamePlayService : IGamePlayService
         };
     }
 
-    public async Task<SubmitAnswerResponse> SubmitAnswerAsync(long matchId, SubmitAnswerRequest request, CancellationToken ct = default)
+    public async Task<SubmitAnswerResponse> SubmitAnswerAsync(long matchId, SubmitAnswerRequest request, CancellationToken cancellationToken = default)
     {
-        var match = await _matchRepository.GetByIdAsync(matchId, ct)
+        var match = await _matchRepository.GetByIdAsync(matchId, cancellationToken)
             ?? throw new KeyNotFoundException($"Match with ID {matchId} not found");
 
         if (match.Status != StatusEnum.InProgress)
@@ -125,7 +125,7 @@ public sealed class GamePlayService : IGamePlayService
             throw new InvalidOperationException("Match must be in InProgress status");
         }
 
-        var playerAnswer = await _playerAnswerRepository.GetByMatchAndQuestionAsync(matchId, request.QuestionId, ct)
+        var playerAnswer = await _playerAnswerRepository.GetByMatchAndQuestionAsync(matchId, request.QuestionId, cancellationToken)
             ?? throw new KeyNotFoundException($"Question {request.QuestionId} is not part of this match");
 
         if (playerAnswer.AnsweredAt != default)
@@ -133,7 +133,7 @@ public sealed class GamePlayService : IGamePlayService
             throw new InvalidOperationException("This question has already been answered");
         }
 
-        var answerOptions = await _answerOptionRepository.GetAnswerOptionsByQuestionId(request.QuestionId, ct);
+        var answerOptions = await _answerOptionRepository.GetAnswerOptionsByQuestionId(request.QuestionId, cancellationToken);
         var answerOptionList = answerOptions.ToList();
         var correctOption = answerOptionList.FirstOrDefault(ao => ao.IsCorrect)
             ?? throw new InvalidOperationException("No correct answer configured for this question");
@@ -151,16 +151,16 @@ public sealed class GamePlayService : IGamePlayService
         playerAnswer.SelectedAnswerOptionId = request.SelectedAnswerOptionId;
         playerAnswer.IsCorrect = isCorrect;
         playerAnswer.AnsweredAt = DateTime.UtcNow;
-        await _playerAnswerRepository.UpdateAsync(playerAnswer, ct);
+        await _playerAnswerRepository.UpdateAsync(playerAnswer, cancellationToken);
 
-        var unanswered = await _playerAnswerRepository.GetUnansweredByMatchIdAsync(matchId, ct);
+        var unanswered = await _playerAnswerRepository.GetUnansweredByMatchIdAsync(matchId, cancellationToken);
         var isLastQuestion = unanswered is null;
 
         if (isLastQuestion)
         {
             match.Status = StatusEnum.Finished;
             match.CreatedAt = DateTime.UtcNow;
-            await _matchRepository.UpdateAsync(match, ct);
+            await _matchRepository.UpdateAsync(match, cancellationToken);
         }
 
         return new SubmitAnswerResponse
@@ -171,9 +171,9 @@ public sealed class GamePlayService : IGamePlayService
         };
     }
 
-    public async Task<GameResultsResponse> GetResultsAsync(long matchId, CancellationToken ct = default)
+    public async Task<GameResultsResponse> GetResultsAsync(long matchId, CancellationToken cancellationToken = default)
     {
-        var match = await _matchRepository.GetByIdAsync(matchId, ct)
+        var match = await _matchRepository.GetByIdAsync(matchId, cancellationToken)
             ?? throw new KeyNotFoundException($"Match with ID {matchId} not found");
 
         if (match.Status != StatusEnum.Finished)
@@ -181,14 +181,14 @@ public sealed class GamePlayService : IGamePlayService
             throw new InvalidOperationException("Match must be in Finished status to view results");
         }
 
-        var playerAnswers = (await _playerAnswerRepository.GetByMatchIdAsync(matchId, ct)).ToList();
+        var playerAnswers = (await _playerAnswerRepository.GetByMatchIdAsync(matchId, cancellationToken)).ToList();
         var totalQuestions = playerAnswers.Count;
         var correctAnswers = playerAnswers.Count(pa => pa.IsCorrect);
 
         var correctOptionsByQuestion = new Dictionary<long, long>();
         foreach (var pa in playerAnswers)
         {
-            var options = await _answerOptionRepository.GetAnswerOptionsByQuestionId(pa.QuestionId, ct);
+            var options = await _answerOptionRepository.GetAnswerOptionsByQuestionId(pa.QuestionId, cancellationToken);
             var correct = options.FirstOrDefault(ao => ao.IsCorrect);
             if (correct is not null)
             {
@@ -204,16 +204,16 @@ public sealed class GamePlayService : IGamePlayService
                 UserId = match.UserId,
                 TotalCorrect = correctAnswers,
                 EloRating = EloRating.Bronze
-            });
+            }, cancellationToken);
         }
         else
         {
             await _playerStatsService.UpdateAsync(new PlayerStatsRequest
             {
                 UserId = match.UserId,
-                TotalCorrect = playerStats.TotalCorrect,
+                TotalCorrect =+ correctAnswers,
                 EloRating = EloRating.Prata
-            });
+            }, cancellationToken);
         }
 
         return new GameResultsResponse

@@ -25,10 +25,5 @@ public class PlayerStatsConf : IEntityTypeConfiguration<PlayerStatsEntity>
         builder.Property(x => x.EloRating)
             .IsRequired()
             .HasMaxLength(20);
-
-        //Relationships
-        builder.HasOne(x => x.User)
-            .WithMany(x => x.PlayerStats)
-            .HasForeignKey(x => x.UserId);
     }
 }
