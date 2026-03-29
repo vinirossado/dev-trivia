@@ -196,7 +196,7 @@ public sealed class GamePlayService : IGamePlayService
             }
         }
 
-        var playerStats = await _playerStatsService.GetStatsByUserIdAsync(match.UserId);
+        var playerStats = await _playerStatsService.GetStatsByUserIdAsync(match.UserId, cancellationToken);
         if (playerStats == null)
         {
             await _playerStatsService.CreateAsync(new PlayerStatsRequest
