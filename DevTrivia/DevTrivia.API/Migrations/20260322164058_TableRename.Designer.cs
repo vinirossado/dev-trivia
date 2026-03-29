@@ -3,6 +3,7 @@ using System;
 using DevTrivia.API.Migrations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DevTrivia.API.Migrations
 {
     [DbContext(typeof(TriviaDbContext))]
-    partial class TriviaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260322164058_TableRename")]
+    partial class TableRename
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -116,16 +119,11 @@ namespace DevTrivia.API.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
                     b.HasIndex("SelectedCategoryId");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Matches", (string)null);
+                    b.ToTable("Matches");
                 });
 
             modelBuilder.Entity("DevTrivia.API.Capabilities.PlayerAnswer.Database.Entities.PlayerAnswerEntity", b =>
@@ -351,15 +349,7 @@ namespace DevTrivia.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DevTrivia.API.Capabilities.User.Database.Entities.UserEntity", "User")
-                        .WithMany("Matches")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Category");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DevTrivia.API.Capabilities.PlayerAnswer.Database.Entities.PlayerAnswerEntity", b =>
@@ -429,8 +419,6 @@ namespace DevTrivia.API.Migrations
 
             modelBuilder.Entity("DevTrivia.API.Capabilities.User.Database.Entities.UserEntity", b =>
                 {
-                    b.Navigation("Matches");
-
                     b.Navigation("PlayerStats");
                 });
 #pragma warning restore 612, 618

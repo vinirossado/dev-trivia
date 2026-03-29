@@ -4,6 +4,9 @@ using DevTrivia.API.Capabilities.Match.Extensions;
 using DevTrivia.API.Capabilities.Match.Models;
 using DevTrivia.API.Capabilities.Match.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Match.Services.Interfaces;
+using DevTrivia.API.Capabilities.PlayerStats.Database.Entities;
+using DevTrivia.API.Capabilities.PlayerStats.Models;
+using DevTrivia.API.Capabilities.PlayerStats.Repositories.Interfaces;
 
 namespace DevTrivia.API.Capabilities.Match.Services;
 
@@ -11,15 +14,18 @@ public sealed class MatchService : IMatchService
 {
     private readonly IMatchRepository _matchRepository;
     private readonly ICategoryRepository _categoryRepository;
+    private readonly IPlayerStatsRepository _playerStatsRepository;
     private readonly ILogger<MatchService> _logger;
 
     public MatchService(
         IMatchRepository matchRepository,
         ICategoryRepository categoryRepository,
+        IPlayerStatsRepository playerStatsRepository,
         ILogger<MatchService> logger)
     {
         _matchRepository = matchRepository;
         _categoryRepository = categoryRepository;
+        _playerStatsRepository = playerStatsRepository;
         _logger = logger;
     }
 
