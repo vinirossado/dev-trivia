@@ -7,12 +7,14 @@ var uniqueId = uniqueString(resourceGroup().id)
 param jwtSecretKey string
 
 @secure()
-@description('PostgreSQL connection string for the trivia database')
-param postgresConnectionString string
+@description('PostgreSQL password')
+param pgSqlPassword string
 
 // Reference the EXISTING App Service Plan from TravelAPI (no new machine)
 var appServicePlanName = 'plan-api-2g45mzh7gjumo'
 var keyVaultName = 'kv-2g45mzh7gjumo'
+
+var postgresConnectionString = 'Server=postgresql-${uniqueId}.postgres.database.azure.com;Database=trivia;Port=5432;User Id=adminuser;Password=${pgSqlPassword};Ssl Mode=Require;'
 
 resource existingAppServicePlan 'Microsoft.Web/serverfarms@2023-12-01' existing = {
   name: appServicePlanName
