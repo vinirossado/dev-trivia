@@ -66,7 +66,7 @@ module jwtSecret 'modules/secrets/keyvault-secret.bicep' = {
   name: 'triviaJwtSecretDeployment'
   params: {
     keyVaultName: keyVaultName
-    secretName: 'JwtSettings--SecretKey--Trivia'
+    secretName: 'JwtSettings--SecretKey'
     secretValue: jwtSecretKey
   }
 }
