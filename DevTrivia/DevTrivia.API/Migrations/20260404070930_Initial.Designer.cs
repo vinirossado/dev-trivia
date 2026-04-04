@@ -12,15 +12,15 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DevTrivia.API.Migrations
 {
     [DbContext(typeof(TriviaDbContext))]
-    [Migration("20260314094438_Removing date properties")]
-    partial class Removingdateproperties
+    [Migration("20260404070930_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.3")
+                .HasAnnotation("ProductVersion", "10.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -119,11 +119,16 @@ namespace DevTrivia.API.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW()");
 
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SelectedCategoryId");
 
-                    b.ToTable("Matches");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Matches", (string)null);
                 });
 
             modelBuilder.Entity("DevTrivia.API.Capabilities.PlayerAnswer.Database.Entities.PlayerAnswerEntity", b =>
@@ -169,6 +174,44 @@ namespace DevTrivia.API.Migrations
                         .IsUnique();
 
                     b.ToTable("PlayerAnswers", (string)null);
+                });
+
+            modelBuilder.Entity("DevTrivia.API.Capabilities.PlayerStats.Database.Entities.PlayerStatsEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<int>("EloRating")
+                        .HasMaxLength(20)
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalCorrect")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalMatches")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PlayerStats", (string)null);
                 });
 
             modelBuilder.Entity("DevTrivia.API.Capabilities.Question.Database.Entities.QuestionEntity", b =>
@@ -272,6 +315,11 @@ namespace DevTrivia.API.Migrations
                     b.Property<string>("ProfileImageUrl")
                         .HasColumnType("text");
 
+                    b.Property<int>("Role")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(2);
+
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -307,7 +355,15 @@ namespace DevTrivia.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DevTrivia.API.Capabilities.User.Database.Entities.UserEntity", "User")
+                        .WithMany("Matches")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Category");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DevTrivia.API.Capabilities.PlayerAnswer.Database.Entities.PlayerAnswerEntity", b =>
@@ -336,6 +392,17 @@ namespace DevTrivia.API.Migrations
                     b.Navigation("SelectedAnswerOption");
                 });
 
+            modelBuilder.Entity("DevTrivia.API.Capabilities.PlayerStats.Database.Entities.PlayerStatsEntity", b =>
+                {
+                    b.HasOne("DevTrivia.API.Capabilities.User.Database.Entities.UserEntity", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("DevTrivia.API.Capabilities.Question.Database.Entities.QuestionEntity", b =>
                 {
                     b.HasOne("DevTrivia.API.Capabilities.Category.Database.Entities.CategoryEntity", "Category")
@@ -362,6 +429,11 @@ namespace DevTrivia.API.Migrations
             modelBuilder.Entity("DevTrivia.API.Capabilities.Question.Database.Entities.QuestionEntity", b =>
                 {
                     b.Navigation("AnswerOptions");
+                });
+
+            modelBuilder.Entity("DevTrivia.API.Capabilities.User.Database.Entities.UserEntity", b =>
+                {
+                    b.Navigation("Matches");
                 });
 #pragma warning restore 612, 618
         }

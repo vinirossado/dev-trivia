@@ -56,7 +56,7 @@ public sealed class UserService : IUserService
             UserId = user.Id,
             Email = user.Email,
             Name = user.Name,
-            Role = user.Role,
+            Role = (RoleEnum)user.Role,
             ExpiresAt = _timeProvider.GetUtcNow().UtcDateTime.AddMinutes(expirationMinutes)
         };
     }
@@ -220,7 +220,7 @@ public sealed class UserService : IUserService
             throw new KeyNotFoundException($"User with ID {id} not found");
         }
 
-        user.Role = role;
+        user.Role = (int)role;
         await _userRepository.UpdateAsync(user, cancellationToken);
 
         return MapToDto(user);
@@ -301,7 +301,7 @@ public sealed class UserService : IUserService
             Id = user.Id,
             Name = user.Name,
             Email = user.Email,
-            Role = user.Role,
+            Role = (RoleEnum)user.Role,
             ProfileImageUrl = user.ProfileImageUrl,
             Bio = user.Bio,
             Location = user.Location,

@@ -8,9 +8,7 @@ namespace DevTrivia.API.Capabilities.User.Database.Entities;
 
 public sealed class UserEntity : BaseEntity
 {
-    public RoleEnum Role { get; set; } = RoleEnum.Player;
-    public ICollection<PlayerStatsEntity> PlayerStats { get; } = new List<PlayerStatsEntity>();
-    public ICollection<MatchEntity> Matches { get; } = new List<MatchEntity>();
+    public int Role { get; set; }
 
     public required string Name { get; set; } = string.Empty;
 
@@ -34,4 +32,5 @@ public sealed class UserEntity : BaseEntity
     public DateTime? LastLoginAt { get; set; }
 
     public string? PreferredLanguage { get; set; }
+    public ICollection<MatchEntity> Matches { get; } = new List<MatchEntity>();
 }

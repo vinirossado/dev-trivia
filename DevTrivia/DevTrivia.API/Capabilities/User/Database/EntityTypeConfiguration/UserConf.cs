@@ -24,7 +24,7 @@ public class UserConf : IEntityTypeConfiguration<UserEntity>
 
         builder.Property(x => x.Role)
             .IsRequired()
-            .HasDefaultValue(Enums.RoleEnum.Player);
+            .HasDefaultValue(2);
 
         builder.Property(x => x.AuthProvider)
             .IsRequired()
@@ -58,8 +58,5 @@ public class UserConf : IEntityTypeConfiguration<UserEntity>
             .WithOne(x => x.User)
             .HasForeignKey(x => x.UserId);
         
-        builder.HasMany(x => x.PlayerStats)
-            .WithOne(x => x.User)
-            .HasForeignKey(x => x.UserId);
     }
 }

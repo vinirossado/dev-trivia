@@ -1,13 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
-
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
 namespace DevTrivia.API.Migrations;
 
 /// <inheritdoc />
-public partial class SeedInitialData : Migration
+public partial class SeedDataInicial : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,12 +17,12 @@ public partial class SeedInitialData : Migration
             columns: new[] { "Id", "CreatedAt", "Description", "Name", "UpdatedAt" },
             values: new object[,]
             {
-                { 100L, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "C# and .NET programming", "c#", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
-                { 101L, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "JavaScript and web development", "javascript", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
-                { 102L, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Python programming", "python", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
-                { 103L, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "SQL and databases", "sql", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
-                { 104L, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "DevOps, CI/CD and cloud infrastructure", "devops", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
-                { 105L, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Git version control", "git", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) }
+                { 100L, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "C# and .NET programming", "C#", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
+                { 101L, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "JavaScript and web development", "Javascript", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
+                { 102L, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Python programming", "Python", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
+                { 103L, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "SQL and databases", "SQL", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
+                { 104L, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "DevOps, CI/CD and cloud infrastructure", "DevOps", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
+                { 105L, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Git version control", "Git", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) }
             });
 
         migrationBuilder.InsertData(

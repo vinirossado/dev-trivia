@@ -11,9 +11,8 @@ public class PlayerStatsConf : IEntityTypeConfiguration<PlayerStatsEntity>
         builder.ToTable("PlayerStats");
 
         builder.Property(x => x.UserId)
-            .IsRequired()
-            .HasColumnType("integer");
-
+            .IsRequired();
+        
         builder.Property(x => x.TotalMatches)
             .IsRequired()
             .HasColumnType("integer");
@@ -25,5 +24,6 @@ public class PlayerStatsConf : IEntityTypeConfiguration<PlayerStatsEntity>
         builder.Property(x => x.EloRating)
             .IsRequired()
             .HasMaxLength(20);
+        
     }
 }

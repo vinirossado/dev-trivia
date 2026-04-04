@@ -17,7 +17,7 @@ namespace DevTrivia.API.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.3")
+                .HasAnnotation("ProductVersion", "10.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -88,7 +88,7 @@ namespace DevTrivia.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("DevTrivia.API.Capabilities.Match.Database.Entities.MatchEntity", b =>
@@ -201,8 +201,8 @@ namespace DevTrivia.API.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -250,7 +250,7 @@ namespace DevTrivia.API.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Questions");
+                    b.ToTable("Questions", (string)null);
                 });
 
             modelBuilder.Entity("DevTrivia.API.Capabilities.User.Database.Entities.UserEntity", b =>
@@ -330,7 +330,7 @@ namespace DevTrivia.API.Migrations
                     b.HasIndex("AuthProvider", "ExternalId")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("DevTrivia.API.Capabilities.AnswerOptions.Database.Entities.AnswerOptionEntity", b =>
@@ -392,7 +392,7 @@ namespace DevTrivia.API.Migrations
             modelBuilder.Entity("DevTrivia.API.Capabilities.PlayerStats.Database.Entities.PlayerStatsEntity", b =>
                 {
                     b.HasOne("DevTrivia.API.Capabilities.User.Database.Entities.UserEntity", "User")
-                        .WithMany("PlayerStats")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -431,8 +431,6 @@ namespace DevTrivia.API.Migrations
             modelBuilder.Entity("DevTrivia.API.Capabilities.User.Database.Entities.UserEntity", b =>
                 {
                     b.Navigation("Matches");
-
-                    b.Navigation("PlayerStats");
                 });
 #pragma warning restore 612, 618
         }
