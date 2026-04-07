@@ -10,6 +10,7 @@ public sealed class MatchEntity : BaseEntity
 {
     public StatusEnum Status { get; set; }
     public required long UserId { get; set; }
+    public bool IsComputed { get; set; } = false;
     public long SelectedCategoryId { get; set; }
 
     public CategoryEntity Category { get; set; } = null!;
