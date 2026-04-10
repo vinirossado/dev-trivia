@@ -218,10 +218,6 @@ public sealed class GamePlayService : IGamePlayService
                 }, cancellationToken);
                 match.IsComputed = true;
             }
-            else
-            {
-                throw new KeyNotFoundException("Stats have already been updated.");
-            }
         }
 
         return new GameResultsResponse
