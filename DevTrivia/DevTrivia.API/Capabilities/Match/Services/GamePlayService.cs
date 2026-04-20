@@ -208,12 +208,16 @@ public sealed class GamePlayService : IGamePlayService
         }
         else
         {
-            await _playerStatsService.UpdateAsync(new PlayerStatsRequest
+            if (match.IsComputed == false)
             {
-                UserId = match.UserId,
-                TotalCorrect =+ correctAnswers,
-                EloRating = EloRating.Prata
-            }, cancellationToken);
+                await _playerStatsService.UpdateAsync(new PlayerStatsRequest
+                {
+                    UserId = match.UserId,
+                    TotalCorrect =+ correctAnswers,
+                    EloRating = EloRating.Prata
+                }, cancellationToken);
+                match.IsComputed = true;
+            }
         }
 
         return new GameResultsResponse

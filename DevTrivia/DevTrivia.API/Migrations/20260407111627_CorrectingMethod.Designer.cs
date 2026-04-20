@@ -3,6 +3,7 @@ using System;
 using DevTrivia.API.Migrations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DevTrivia.API.Migrations
 {
     [DbContext(typeof(TriviaDbContext))]
-    partial class TriviaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260407111627_CorrectingMethod")]
+    partial class CorrectingMethod
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -88,7 +91,7 @@ namespace DevTrivia.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("DevTrivia.API.Capabilities.Match.Database.Entities.MatchEntity", b =>
@@ -253,7 +256,7 @@ namespace DevTrivia.API.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Questions", (string)null);
+                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("DevTrivia.API.Capabilities.User.Database.Entities.UserEntity", b =>
@@ -333,7 +336,7 @@ namespace DevTrivia.API.Migrations
                     b.HasIndex("AuthProvider", "ExternalId")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("DevTrivia.API.Capabilities.AnswerOptions.Database.Entities.AnswerOptionEntity", b =>

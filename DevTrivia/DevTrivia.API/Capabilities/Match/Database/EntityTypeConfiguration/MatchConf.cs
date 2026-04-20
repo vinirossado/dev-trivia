@@ -20,6 +20,9 @@ public class MatchConf : IEntityTypeConfiguration<MatchEntity>
         builder.Property(x => x.SelectedCategoryId)
             .IsRequired();
 
+        builder.Property(x => x.IsComputed)
+            .IsRequired();
+
         // Relationships
         builder.HasOne(x => x.Category)
             .WithMany(x => x.Matches)
