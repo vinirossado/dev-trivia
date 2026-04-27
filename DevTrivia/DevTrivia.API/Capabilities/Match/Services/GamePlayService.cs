@@ -1,4 +1,3 @@
-using Azure.Core;
 using DevTrivia.API.Capabilities.AnswerOptions.Repositories.Interfaces;
 using DevTrivia.API.Capabilities.Match.Enums;
 using DevTrivia.API.Capabilities.Match.Models;
@@ -16,6 +15,7 @@ namespace DevTrivia.API.Capabilities.Match.Services;
 public sealed class GamePlayService : IGamePlayService
 {
     private readonly IMatchRepository _matchRepository;
+    private readonly IMatchService _matchService;
     private readonly IQuestionRepository _questionRepository;
     private readonly IAnswerOptionRepository _answerOptionRepository;
     private readonly IPlayerAnswerRepository _playerAnswerRepository;
@@ -23,12 +23,14 @@ public sealed class GamePlayService : IGamePlayService
 
     public GamePlayService(
         IMatchRepository matchRepository,
+        IMatchService matchService,
         IQuestionRepository questionRepository,
         IAnswerOptionRepository answerOptionRepository,
         IPlayerStatsService playerStatsService,
         IPlayerAnswerRepository playerAnswerRepository)
     {
         _matchRepository = matchRepository;
+        _matchService = matchService;
         _questionRepository = questionRepository;
         _answerOptionRepository = answerOptionRepository;
         _playerAnswerRepository = playerAnswerRepository;
@@ -53,7 +55,7 @@ public sealed class GamePlayService : IGamePlayService
         }
 
         Random.Shared.Shuffle(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(questions));
-        var selectedQuestions = questions.Take(10).ToList();
+        var selectedQuestions = questions.Take(5).ToList();
 
         foreach (var question in selectedQuestions)
         {
@@ -77,6 +79,42 @@ public sealed class GamePlayService : IGamePlayService
             CategoryName = match.Category.Name,
             Status = StatusEnum.InProgress
         };
+    }
+
+    public class Worker : BackgroundService
+    {
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<Worker> _logger;
+
+        public Worker(IServiceProvider serviceProvider, ILogger<Worker> logger)
+        {
+            _serviceProvider = serviceProvider;
+            _logger = logger;
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var matchRepository = scope.ServiceProvider.GetRequiredService<IMatchRepository>();
+                    var matches = await matchRepository.GetAllAsync(stoppingToken);
+
+                    foreach (var match in matches)
+                    {
+                        if (match.Status == StatusEnum.InProgress && match.CreatedAt <= DateTime.UtcNow.AddSeconds(-150))
+                        {
+                            match.Status = StatusEnum.Finished;
+                            await matchRepository.UpdateAsync(match, stoppingToken);
+                        }
+                    }
+                }
+
+                _logger.LogInformation($"Worker executado em: {DateTimeOffset.Now}");
+                await Task.Delay(5000, stoppingToken);
+            }
+        }
     }
 
     public async Task<GameQuestionResponse> GetNextQuestionAsync(long matchId, CancellationToken cancellationToken = default)
@@ -205,6 +243,8 @@ public sealed class GamePlayService : IGamePlayService
                 TotalCorrect = correctAnswers,
                 EloRating = EloRating.Bronze
             }, cancellationToken);
+            match.IsComputed = true;
+            await _matchRepository.UpdateAsync(match, cancellationToken);
         }
         else
         {
@@ -213,10 +253,11 @@ public sealed class GamePlayService : IGamePlayService
                 await _playerStatsService.UpdateAsync(new PlayerStatsRequest
                 {
                     UserId = match.UserId,
-                    TotalCorrect =+ correctAnswers,
+                    TotalCorrect = +correctAnswers,
                     EloRating = EloRating.Prata
                 }, cancellationToken);
                 match.IsComputed = true;
+                await _matchRepository.UpdateAsync(match, cancellationToken);
             }
         }
 
