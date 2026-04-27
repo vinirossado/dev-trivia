@@ -134,6 +134,9 @@ builder.Services.AddSwaggerGen(options => options.ConfigureSwagger());
 // Add TimeProvider
 builder.Services.AddSingleton(TimeProvider.System);
 
+//Add Worker
+builder.Services.AddHostedService<GamePlayService.Worker>();
+
 // Configure JWT settings
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"];
